@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 32" fill="none" role="img" aria-label="Metrik">
+  <rect x="0" y="18" width="5" height="10" rx="1.5" fill="currentColor" opacity="0.55"/>
+  <rect x="9.5" y="10" width="5" height="18" rx="1.5" fill="currentColor"/>
+  <rect x="19" y="4" width="5" height="24" rx="1.5" fill="#7C5CFF"/>
+  <text x="36" y="22.5" fill="currentColor" font-family="Geist, Inter, system-ui, sans-serif" font-size="16" font-weight="500" letter-spacing="-0.04em">Metrik</text>
+</svg>

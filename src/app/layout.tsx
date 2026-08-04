@@ -14,9 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Metrik — Systems that make processes better",
+  title: "Metrik — Sistemas que mejoran procesos",
   description:
     "Metrik diseña y construye sistemas que conectan procesos, automatizan operaciones y dan claridad a tu negocio.",
+  icons: {
+    icon: "/brand/favicon.svg",
+  },
 };
 
 export default function RootLayout({

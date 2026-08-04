@@ -1,68 +1,89 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Menu } from "lucide-react";
 import { motion } from "framer-motion";
 
-import { Button } from "@/components/ui/button";
-import { Container } from "@/components/ui/container";
+import { MobileMenu } from "@/components/layout/mobile-menu";
+import { AnimatedLink } from "@/components/ui/animated-link";
+import { Logo } from "@/components/ui/logo";
+import { PrimaryButton } from "@/components/ui/metrik-button";
+import { navLinks } from "@/data/navigation";
+import { useScrollState } from "@/hooks/use-scroll-state";
+import { easeOutExpo } from "@/lib/easing";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "#work", label: "Work" },
-  { href: "#process", label: "Process" },
-  { href: "#services", label: "Services" },
-  { href: "#contact", label: "Contact" },
-] as const;
-
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const { scrolled } = useScrollState(18);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-300",
-        scrolled
-          ? "border-b border-border bg-background/70 backdrop-blur-xl"
-          : "border-b border-transparent bg-transparent"
-      )}
-    >
-      <Container className="flex h-16 items-center justify-between md:h-[4.5rem]">
-        <a
-          href="#"
-          className="text-[15px] font-medium tracking-[-0.02em] text-foreground transition-opacity hover:opacity-80"
+    <>
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 md:px-4 md:pt-4">
+        <motion.header
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: easeOutExpo }}
+          className={cn(
+            "pointer-events-auto w-full transition-[max-width,background-color,border-color,box-shadow,backdrop-filter,border-radius] duration-500 ease-out",
+            scrolled
+              ? "max-w-3xl rounded-full border border-border/90 bg-background/70 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+              : "max-w-6xl rounded-none border border-transparent bg-transparent shadow-none backdrop-blur-0"
+          )}
         >
-          Metrik
-        </a>
-
-        <nav className="hidden items-center gap-8 md:flex">
-          {links.map((link) => (
+          <div
+            className={cn(
+              "flex items-center justify-between gap-4 transition-[height,padding] duration-500",
+              scrolled ? "h-14 px-4 md:px-5" : "h-16 px-3 md:h-[4.25rem] md:px-2"
+            )}
+          >
             <a
-              key={link.href}
-              href={link.href}
-              className="text-[13px] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+              href="#"
+              aria-label="Metrik — inicio"
+              className="group inline-flex items-center rounded-sm transition-opacity duration-300 hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              {link.label}
+              <span className="transition-transform duration-300 group-hover:-translate-y-px">
+                <Logo />
+              </span>
             </a>
-          ))}
-        </nav>
 
-        <Button
-          render={<a href="#contact" />}
-          className="rounded-full bg-foreground text-[13px] font-medium text-primary-foreground hover:bg-foreground/90"
-        >
-          Book a Call
-        </Button>
-      </Container>
-    </motion.header>
+            <nav
+              className="hidden items-center gap-7 md:flex"
+              aria-label="Navegación principal"
+            >
+              {navLinks.map((link) => (
+                <AnimatedLink key={link.href} href={link.href}>
+                  {link.label}
+                </AnimatedLink>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-2">
+              <PrimaryButton
+                href="#contacto"
+                className={cn(
+                  "hidden h-9 px-4 text-[13px] sm:inline-flex",
+                  scrolled && "h-9"
+                )}
+              >
+                Agendar una llamada
+              </PrimaryButton>
+
+              <button
+                type="button"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 md:hidden"
+                aria-label="Abrir menú"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(true)}
+              >
+                <Menu className="size-4" />
+              </button>
+            </div>
+          </div>
+        </motion.header>
+      </div>
+
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+    </>
   );
 }
