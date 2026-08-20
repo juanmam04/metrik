@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Metrik">
-  <rect x="4" y="18" width="5" height="10" rx="1.5" fill="currentColor" opacity="0.55"/>
-  <rect x="13.5" y="10" width="5" height="18" rx="1.5" fill="currentColor"/>
-  <rect x="23" y="4" width="5" height="24" rx="1.5" fill="#7C5CFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Metrik">
+  <path d="M1.84 56.54 L15.23 56.64 L33.33 37.73 L33.23 23.51 Z" fill="currentColor"/>
+  <path d="M36.19 56.84 L47.13 45.39 L47.03 23.92 L36.19 44.98 Z" fill="currentColor"/>
+  <path d="M50.61 57.35 L50.61 17.99 L62.06 6.65 L62.06 45.8 Z" fill="#513CFA"/>
 </svg>

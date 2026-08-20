@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
 import { AnimatedLink } from "@/components/ui/animated-link";
-import { PrimaryButton } from "@/components/ui/metrik-button";
 import { navLinks } from "@/data/navigation";
 import { easeOutExpo } from "@/lib/easing";
 
@@ -123,15 +122,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               ))}
             </nav>
 
-            <div className="mt-8">
-              <PrimaryButton
-                href="#contacto"
-                className="w-full"
-                onClick={onClose}
-              >
-                Agendar una llamada
-              </PrimaryButton>
-            </div>
           </motion.div>
         </motion.div>
       ) : null}

@@ -1,17 +1,19 @@
+import { PremiumExperience } from "@/components/premium/experience/premium-experience";
+import { PremiumFooter } from "@/components/premium/layout/premium-footer";
+import { PremiumNav } from "@/components/premium/layout/premium-nav";
+import { SubtleCursor } from "@/components/premium/cursor/subtle-cursor";
 import { SiteAtmosphere } from "@/components/background/site-atmosphere";
-import { Hero } from "@/components/hero/hero";
-import { Navbar } from "@/components/layout/navbar";
-import { Philosophy } from "@/components/philosophy/philosophy";
 
 export default function Home() {
   return (
     <>
       <SiteAtmosphere />
-      <Navbar />
+      <SubtleCursor />
+      <PremiumNav />
       <main>
-        <Hero />
-        <Philosophy />
+        <PremiumExperience />
       </main>
+      <PremiumFooter />
     </>
   );
 }

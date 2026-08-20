@@ -1,5 +1,6 @@
 "use client";
 
+import { MetrikMark } from "@/components/ui/metrik-mark";
 import { cn } from "@/lib/utils";
 
 type LogoProps = {
@@ -7,34 +8,11 @@ type LogoProps = {
   markOnly?: boolean;
 };
 
-function Mark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      aria-hidden
-      className={cn("size-[22px]", className)}
-    >
-      <rect
-        x="4"
-        y="18"
-        width="5"
-        height="10"
-        rx="1.5"
-        fill="currentColor"
-        opacity="0.55"
-      />
-      <rect x="13.5" y="10" width="5" height="18" rx="1.5" fill="currentColor" />
-      <rect x="23" y="4" width="5" height="24" rx="1.5" fill="#7C5CFF" />
-    </svg>
-  );
-}
-
 export function Logo({ className, markOnly = false }: LogoProps) {
   if (markOnly) {
     return (
       <span className={cn("inline-flex text-foreground", className)}>
-        <Mark className="size-7" />
+        <MetrikMark className="size-8" />
         <span className="sr-only">Metrik</span>
       </span>
     );
@@ -43,12 +21,14 @@ export function Logo({ className, markOnly = false }: LogoProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2.5 text-foreground",
+        "inline-flex items-center gap-3 text-foreground",
         className
       )}
     >
-      <Mark />
-      <span className="text-[15px] font-medium tracking-[-0.03em]">Metrik</span>
+      <MetrikMark className="size-[28px] sm:size-[30px]" />
+      <span className="text-[17px] font-medium tracking-[-0.03em] sm:text-[18px]">
+        Metrik
+      </span>
     </span>
   );
 }
