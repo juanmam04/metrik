@@ -3,11 +3,11 @@ const MONO = "var(--font-mono), ui-monospace, monospace";
 
 /** Waypoints del pensamiento — el trazo pasa por cada uno. */
 export const THINK = [
-  { x: 120, y: 240 }, // origen
-  { x: 220, y: 400 }, // Información dispersa
-  { x: 460, y: 300 }, // Procesos manuales
-  { x: 640, y: 455 }, // Seguimiento difícil
-  { x: 380, y: 660 }, // Trabajo duplicado
+  { x: 200, y: 210 },
+  { x: 300, y: 370 },
+  { x: 520, y: 270 },
+  { x: 700, y: 420 },
+  { x: 440, y: 590 },
 ] as const;
 
 /** Columnas de criterios — curva que pasa por cada nodo. */
@@ -145,9 +145,8 @@ const AXIS_SPINE = curveThrough([
 export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
   return (
     <svg
-      className="nv-world pointer-events-none h-full w-full overflow-visible"
-      // Mobile: meet (no slice) para que los 3 ejes y el sistema no se corten a los costados
-      viewBox={compact ? "60 60 780 720" : "40 40 820 780"}
+      className="nv-world pointer-events-none h-full w-full"
+      viewBox={compact ? "60 60 780 720" : "100 70 740 640"}
       fill="none"
       aria-hidden
       preserveAspectRatio="xMidYMid meet"
@@ -165,35 +164,34 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
           <stop offset="55%" stopColor="#513CFA" />
           <stop offset="100%" stopColor="#3D2CC7" />
         </linearGradient>
+        <radialGradient id="nv-orb-a" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(81,60,250,0.28)" />
+          <stop offset="55%" stopColor="rgba(81,60,250,0.08)" />
+          <stop offset="100%" stopColor="rgba(81,60,250,0)" />
+        </radialGradient>
+        <radialGradient id="nv-orb-b" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(107,92,255,0.2)" />
+          <stop offset="60%" stopColor="rgba(81,60,250,0.05)" />
+          <stop offset="100%" stopColor="rgba(81,60,250,0)" />
+        </radialGradient>
+        <radialGradient id="nv-orb-c" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(81,60,250,0.16)" />
+          <stop offset="100%" stopColor="rgba(81,60,250,0)" />
+        </radialGradient>
       </defs>
 
       <g className="nv-camera">
-        {/* Atmósfera abierta — sin círculo contenedor */}
+        {/* Burbujas violetas — atmósfera, sin pelear con el copy */}
         <g className="nv-atmosphere" opacity="0.5">
-          <ellipse
-            cx="520"
-            cy="400"
-            rx="340"
-            ry="220"
-            fill="rgba(81,60,250,0.04)"
-            transform="rotate(-18 520 400)"
-          />
-          <ellipse
-            cx="380"
-            cy="520"
-            rx="200"
-            ry="140"
-            fill="rgba(81,60,250,0.025)"
-            transform="rotate(12 380 520)"
-          />
-          {/* Marcas editoriales sueltas */}
-          <g stroke="rgba(255,255,255,0.07)" strokeWidth="0.6">
-            <line x1="96" y1="120" x2="112" y2="120" />
-            <line x1="96" y1="120" x2="96" y2="136" />
-            <line x1="820" y1="160" x2="804" y2="160" />
-            <line x1="820" y1="160" x2="820" y2="176" />
-            <line x1="780" y1="700" x2="796" y2="700" />
-            <line x1="796" y1="700" x2="796" y2="684" />
+          <circle cx="560" cy="340" r="210" fill="url(#nv-orb-a)" />
+          <circle cx="340" cy="480" r="160" fill="url(#nv-orb-b)" />
+          <circle cx="700" cy="520" r="130" fill="url(#nv-orb-c)" />
+          <circle cx="420" cy="220" r="90" fill="url(#nv-orb-c)" />
+          <g stroke="rgba(255,255,255,0.08)" strokeWidth="0.7">
+            <line x1="160" y1="120" x2="176" y2="120" />
+            <line x1="160" y1="120" x2="160" y2="136" />
+            <line x1="800" y1="150" x2="784" y2="150" />
+            <line x1="800" y1="150" x2="800" y2="166" />
           </g>
         </g>
 
@@ -214,35 +212,35 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
         <g className="nv-annos" opacity="0">
           <g>
             <path
-              d="M 300 150 L 300 168 L 318 168"
+              d="M 360 140 L 360 158 L 378 158"
               stroke="rgba(255,255,255,0.35)"
               strokeWidth="0.9"
             />
-            <text x="326" y="172" fill="rgba(255,255,255,0.5)" fontSize="12" fontFamily={MONO}>
+            <text x="386" y="162" fill="rgba(255,255,255,0.5)" fontSize="12" fontFamily={MONO}>
               excel + wsp
             </text>
           </g>
           <g>
             <path
-              d="M 700 290 L 700 308 L 682 308"
+              d="M 740 280 L 740 298 L 722 298"
               stroke="rgba(255,255,255,0.3)"
               strokeWidth="0.9"
             />
-            <text x="676" y="312" textAnchor="end" fill="rgba(255,255,255,0.45)" fontSize="12" fontFamily={MONO}>
+            <text x="716" y="302" textAnchor="end" fill="rgba(255,255,255,0.45)" fontSize="12" fontFamily={MONO}>
               sin dueño
             </text>
           </g>
           <g>
             <path
-              d="M 96 500 L 96 518 L 114 518"
+              d="M 620 560 L 620 578 L 638 578"
               stroke="rgba(255,255,255,0.28)"
               strokeWidth="0.9"
             />
-            <text x="122" y="522" fill="rgba(255,255,255,0.42)" fontSize="12" fontFamily={MONO}>
+            <text x="646" y="582" fill="rgba(255,255,255,0.42)" fontSize="12" fontFamily={MONO}>
               ¿quién actualiza?
             </text>
           </g>
-          <text x="560" y="710" fill="rgba(255,255,255,0.36)" fontSize="12" fontFamily={MONO}>
+          <text x="580" y="650" fill="rgba(255,255,255,0.36)" fontSize="12" fontFamily={MONO}>
             v3 / v7 / “la buena”
           </text>
         </g>
@@ -462,20 +460,20 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             x="450"
             y="240"
             textAnchor="middle"
-            fill="rgba(255,255,255,0.72)"
-            fontSize="13"
+            fill="rgba(255,255,255,0.85)"
+            fontSize="14"
             fontFamily={MONO}
-            letterSpacing="3.2"
+            letterSpacing="3.6"
           >
             CRITERIOS
           </text>
           <line
-            x1="210"
+            x1="180"
             y1="262"
-            x2="690"
+            x2="720"
             y2="262"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="0.75"
+            stroke="rgba(255,255,255,0.28)"
+            strokeWidth="0.85"
           />
           <path
             className="nv-draw nv-axis-spine"

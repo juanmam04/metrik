@@ -18,7 +18,7 @@ const LOGO_BARS = [
   "M50.61 57.35 L50.61 17.99 L62.06 6.65 L62.06 45.8 Z",
 ] as const;
 
-const SCROLL_VH = { desktop: 9.8 };
+const SCROLL_VH = { desktop: 7.4 };
 
 const BEATS = [
   {
@@ -42,6 +42,7 @@ const BEATS = [
         antes de construir.
       </>
     ),
+    body: "Entramos en la operación: dónde se pierde información, qué se hace a mano y qué nadie puede ver en tiempo real.",
   },
   {
     id: "understand",
@@ -52,6 +53,7 @@ const BEATS = [
         el problema correcto.
       </>
     ),
+    body: "No automatizamos el caos. Definimos criterios claros: qué centralizar, qué automatizar y qué tiene que quedar visible.",
   },
   {
     id: "structure",
@@ -62,6 +64,7 @@ const BEATS = [
         en estructura.
       </>
     ),
+    body: "Armamos el sistema alrededor del flujo real: clientes, pedidos, pagos y operación hablándose entre sí.",
   },
   {
     id: "build",
@@ -72,6 +75,7 @@ const BEATS = [
         realmente necesitás.
       </>
     ),
+    body: "El producto nace del núcleo del problema — no de una lista de features inventadas.",
   },
   {
     id: "product",
@@ -192,7 +196,13 @@ export function NarrativeExperience() {
       gsap.set(".nv-sys-links", { opacity: 0 });
       gsap.set(".nv-wire", { opacity: 0 });
       gsap.set(".nv-hot-frame", { attr: { height: 220, y: 270 } });
-      gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "470 380" });
+      gsap.set(".nv-camera", {
+        x: 0,
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        svgOrigin: "480 390",
+      });
       gsap.set(".nv-product", {
         autoAlpha: 0,
         scale: 0.92,
@@ -207,7 +217,7 @@ export function NarrativeExperience() {
       gsap.set(".nv-beat", { autoAlpha: 0 });
       gsap.set(".nv-beat-hero", { autoAlpha: 1 });
       gsap.set(".nv-need", { opacity: 0 });
-      gsap.set(".nv-atmosphere", { opacity: 0.55 });
+      gsap.set(".nv-atmosphere", { opacity: 0.9 });
       gsap.set(".nv-annos", { opacity: 0 });
       gsap.set(".nv-deadends", { opacity: 0 });
       gsap.set(".nv-think", { opacity: 1 });
@@ -269,7 +279,7 @@ export function NarrativeExperience() {
       });
 
       copySwap(tl, ".nv-beat-hero", ".nv-beat-observe", 0.08);
-      tl.to(".nv-atmosphere", { opacity: 0.85, duration: 0.06 }, 0);
+      tl.to(".nv-atmosphere", { opacity: 1, duration: 0.06 }, 0);
       tl.to(pulse, { autoAlpha: 1, duration: 0.04 }, 0.01);
 
       if (line && lineLen > 0) {
@@ -312,7 +322,7 @@ export function NarrativeExperience() {
 
       copySwap(tl, ".nv-beat-observe", ".nv-beat-understand", 0.26);
 
-      tl.to(".nv-atmosphere", { opacity: 0, duration: 0.08 }, 0.26);
+      tl.to(".nv-atmosphere", { opacity: 0.35, duration: 0.08 }, 0.26);
       tl.to(".nv-annos", { opacity: 0, duration: 0.06 }, 0.26);
       tl.to(".nv-deadends", { opacity: 0, duration: 0.06 }, 0.26);
       tl.to(".nv-think", { opacity: 0, duration: 0.1 }, 0.28);
@@ -406,9 +416,14 @@ export function NarrativeExperience() {
               reducedMotion ? "min-h-[100svh]" : "h-[100svh]"
             )}
           >
-            <div className="flex h-full w-full flex-col lg:flex-row">
-              <div className="relative z-20 flex w-full shrink-0 items-center overflow-hidden px-5 py-14 sm:px-8 lg:w-[40%] lg:px-10 lg:py-0 xl:w-[42%] xl:px-14">
-                <div className="relative w-full max-w-xl">
+            <div className="flex h-full w-full flex-row">
+              <div className="relative z-20 flex w-[40%] shrink-0 items-center bg-[#050505] px-10 xl:w-[38%] xl:px-12">
+                {/* Fade suave hacia el mundo — sin que el SVG cruce el texto */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-r from-[#050505] to-transparent"
+                />
+                <div className="relative w-full max-w-lg pr-4">
                   {BEATS.map((beat) => (
                     <div
                       key={beat.id}
@@ -424,13 +439,13 @@ export function NarrativeExperience() {
                       <h2
                         className={cn(
                           "font-display font-medium tracking-[-0.045em] text-white",
-                          "text-[2.35rem] leading-[1.05] sm:text-[2.85rem] lg:text-[3.35rem] xl:text-[3.6rem]"
+                          "text-[2.55rem] leading-[1.05] lg:text-[3.05rem] xl:text-[3.25rem]"
                         )}
                       >
                         {beat.title}
                       </h2>
                       {"body" in beat && beat.body ? (
-                        <p className="mt-7 max-w-[28rem] text-[16px] leading-[1.65] text-white/55 sm:text-[17px] sm:leading-[1.7]">
+                        <p className="mt-6 max-w-[26rem] text-[16px] leading-[1.65] text-white/55 lg:text-[17px] lg:leading-[1.7]">
                           {beat.body}
                         </p>
                       ) : null}
@@ -455,8 +470,8 @@ export function NarrativeExperience() {
                 </div>
               </div>
 
-              <div className="relative z-10 min-h-0 flex-1">
-                <div className="absolute inset-0 overflow-visible">
+              <div className="relative z-10 min-h-0 flex-1 overflow-hidden bg-[#050505]">
+                <div className="absolute inset-0 overflow-hidden">
                   <NarrativeWorld />
                   <NarrativeProduct />
                 </div>
