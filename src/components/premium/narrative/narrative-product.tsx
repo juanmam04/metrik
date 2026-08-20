@@ -1,16 +1,36 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 /**
  * Consecuencia del módulo PEDIDOS.
  * Payoff de la secuencia: la UI real del sistema.
  */
-export function NarrativeProduct() {
+export function NarrativeProduct({
+  variant = "stage",
+}: {
+  variant?: "stage" | "inline";
+}) {
+  const inline = variant === "inline";
+
   return (
     <div
-      className="nv-product pointer-events-none absolute inset-0 z-20 flex items-end justify-center px-4 pb-36 pt-16 sm:items-center sm:p-8 lg:p-6 xl:p-8"
-      style={{ opacity: 0, visibility: "hidden" }}
+      className={cn(
+        "nv-product pointer-events-none",
+        inline
+          ? "relative w-full"
+          : "absolute inset-0 z-20 flex items-end justify-center px-4 pb-36 pt-16 sm:items-center sm:p-8 lg:p-6 xl:p-8"
+      )}
+      style={inline ? undefined : { opacity: 0, visibility: "hidden" }}
     >
-      <div className="flex max-h-[min(52svh,380px)] w-full max-w-[920px] flex-col overflow-hidden rounded-[12px] border border-white/[0.12] bg-[#0b0b0d] shadow-[0_40px_100px_rgba(0,0,0,0.55)] sm:max-h-none sm:aspect-[16/10] sm:flex-row lg:max-h-[min(78vh,640px)]">
+      <div
+        className={cn(
+          "flex w-full flex-col overflow-hidden rounded-[12px] border border-white/[0.12] bg-[#0b0b0d] shadow-[0_40px_100px_rgba(0,0,0,0.55)]",
+          inline
+            ? "max-h-none"
+            : "max-h-[min(52svh,380px)] max-w-[920px] sm:max-h-none sm:aspect-[16/10] sm:flex-row lg:max-h-[min(78vh,640px)]"
+        )}
+      >
         <aside className="hidden w-14 shrink-0 flex-col items-center gap-5 border-r border-white/[0.07] py-5 sm:flex">
           <span className="size-1.5 rounded-full bg-accent" />
           <span className="size-1.5 rounded-full bg-white/20" />

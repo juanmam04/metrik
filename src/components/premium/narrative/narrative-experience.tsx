@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { NarrativeMobile } from "@/components/premium/narrative/narrative-mobile";
 import { NarrativeProduct } from "@/components/premium/narrative/narrative-product";
 import { NarrativeWorld } from "@/components/premium/narrative/narrative-world";
 import { MARK_PURPLE, MARK_VIEWBOX } from "@/components/ui/metrik-mark";
@@ -17,7 +18,7 @@ const LOGO_BARS = [
   "M50.61 57.35 L50.61 17.99 L62.06 6.65 L62.06 45.8 Z",
 ] as const;
 
-const SCROLL_VH = { desktop: 9.8, mobile: 8.2 };
+const SCROLL_VH = { desktop: 9.8 };
 
 const BEATS = [
   {
@@ -143,8 +144,8 @@ function copySwap(
 }
 
 /**
- * Un mundo continuo. Scrub reversible.
- * CAOS → OBSERVAR → ENTENDER → ESTRUCTURAR → CONSTRUIR → PRODUCTO
+ * Un mundo continuo. Scrub reversible en desktop.
+ * En mobile: NarrativeMobile (sin pin), visible solo vía CSS para evitar hydration mismatch.
  */
 export function NarrativeExperience() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -153,6 +154,10 @@ export function NarrativeExperience() {
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   useEffect(() => {
+    const mobileNow =
+      typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+    if (mobileNow || isMobile) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const section = sectionRef.current;
@@ -187,13 +192,7 @@ export function NarrativeExperience() {
       gsap.set(".nv-sys-links", { opacity: 0 });
       gsap.set(".nv-wire", { opacity: 0 });
       gsap.set(".nv-hot-frame", { attr: { height: 220, y: 270 } });
-      gsap.set(".nv-camera", {
-        x: 0,
-        y: isMobile ? -28 : 0,
-        scale: isMobile ? 0.96 : 1,
-        opacity: 1,
-        svgOrigin: "470 380",
-      });
+      gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "470 380" });
       gsap.set(".nv-product", {
         autoAlpha: 0,
         scale: 0.92,
@@ -207,9 +206,8 @@ export function NarrativeExperience() {
       });
       gsap.set(".nv-beat", { autoAlpha: 0 });
       gsap.set(".nv-beat-hero", { autoAlpha: 1 });
-      // Primer frame: solo atmósfera + trazo naciendo. Sin copy a la derecha.
       gsap.set(".nv-need", { opacity: 0 });
-      gsap.set(".nv-atmosphere", { opacity: isMobile ? 0.35 : 0.55 });
+      gsap.set(".nv-atmosphere", { opacity: 0.55 });
       gsap.set(".nv-annos", { opacity: 0 });
       gsap.set(".nv-deadends", { opacity: 0 });
       gsap.set(".nv-think", { opacity: 1 });
@@ -245,7 +243,6 @@ export function NarrativeExperience() {
         gsap.set(glow, { attr: { "stroke-dashoffset": lineLen }, opacity: 0 });
       }
 
-      // Cada nodo se enciende cuando el trazo lo alcanza (no antes)
       const DRAW = 0.26;
       const fragRatios =
         line && lineLen > 0
@@ -264,14 +261,13 @@ export function NarrativeExperience() {
           trigger: section,
           start: "top top",
           end: "bottom bottom",
+          scrub: 0.65,
           pin: stage,
-          scrub: 0.85,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
 
-      /* ——— 0–0.26 OBSERVAR: trazo pasa por cada punto y recién ahí lo revela ——— */
       copySwap(tl, ".nv-beat-hero", ".nv-beat-observe", 0.08);
       tl.to(".nv-atmosphere", { opacity: 0.85, duration: 0.06 }, 0);
       tl.to(pulse, { autoAlpha: 1, duration: 0.04 }, 0.01);
@@ -294,10 +290,8 @@ export function NarrativeExperience() {
         tl.fromTo(traveler, { p: 0 }, { p: 1, duration: DRAW, onUpdate: placePulse }, 0);
       }
       tl.to(".nv-pulse-ring", { opacity: 0.75, duration: 0.04 }, 0.02);
-      if (!isMobile) {
-        tl.to(".nv-deadends", { opacity: 0.7, duration: 0.1 }, 0.07);
-        tl.to(".nv-annos", { opacity: 0.85, duration: 0.1 }, 0.09);
-      }
+      tl.to(".nv-deadends", { opacity: 0.7, duration: 0.1 }, 0.07);
+      tl.to(".nv-annos", { opacity: 0.85, duration: 0.1 }, 0.09);
 
       const revealFrag = (i: number, at: number) => {
         tl.to(`.nv-frag-${i} .nv-frag-dot`, { fillOpacity: 1, duration: 0.025 }, at);
@@ -306,23 +300,18 @@ export function NarrativeExperience() {
         tl.to(`.nv-frag-${i} .nv-frag-tick`, { opacity: 0.9, duration: 0.03 }, at);
         tl.to(`.nv-frag-${i} .nv-frag-tag`, { opacity: 1, duration: 0.035 }, at);
         tl.to(`.nv-frag-${i} .nv-frag-chaos`, { opacity: 1, duration: 0.04 }, at);
-        if (!isMobile) {
-          tl.to(`.nv-frag-${i} .nv-frag-evidence`, { opacity: 1, duration: 0.04 }, at + 0.008);
-        }
+        tl.to(`.nv-frag-${i} .nv-frag-evidence`, { opacity: 1, duration: 0.04 }, at + 0.008);
       };
       fragRatios.forEach((ratio, i) => {
-        // Un pelo después de tocar el waypoint, para que el trazo ya esté debajo
         const at = Math.min(DRAW - 0.01, Math.max(0.02, ratio * DRAW + 0.008));
         revealFrag(i, at);
       });
 
-      tl.to(".nv-annos", { opacity: isMobile ? 0 : 0.55, duration: 0.08 }, 0.2);
-      tl.to(".nv-deadends", { opacity: isMobile ? 0 : 0.4, duration: 0.08 }, 0.2);
+      tl.to(".nv-annos", { opacity: 0.55, duration: 0.08 }, 0.2);
+      tl.to(".nv-deadends", { opacity: 0.4, duration: 0.08 }, 0.2);
 
-      /* ——— 0.26–0.46 ENTENDER: criterios con peso editorial ——— */
       copySwap(tl, ".nv-beat-observe", ".nv-beat-understand", 0.26);
 
-      tl.to(".nv-need", { opacity: 0, duration: 0.08 }, 0.26);
       tl.to(".nv-atmosphere", { opacity: 0, duration: 0.08 }, 0.26);
       tl.to(".nv-annos", { opacity: 0, duration: 0.06 }, 0.26);
       tl.to(".nv-deadends", { opacity: 0, duration: 0.06 }, 0.26);
@@ -331,73 +320,40 @@ export function NarrativeExperience() {
       tl.to(pulse, { autoAlpha: 0, duration: 0.08 }, 0.28);
       tl.to(".nv-pulse-ring", { opacity: 0, duration: 0.06 }, 0.28);
 
-      // Salen los síntomas; entran criterios ya dibujados sobre la curva (mismas coords)
       tl.to(".nv-frag", { opacity: 0, duration: 0.1 }, 0.28);
       tl.to(".nv-axis-stage", { opacity: 1, duration: 0.1 }, 0.32);
       tl.to(".nv-axis-spine", { attr: { "stroke-dashoffset": 0 }, duration: 0.14 }, 0.34);
 
-      /* ——— 0.46–0.54 HANDOFF limpio ——— */
       copySwap(tl, ".nv-beat-understand", ".nv-beat-structure", 0.46);
-
       tl.to(".nv-axis-stage", { opacity: 0, duration: 0.08 }, 0.46);
 
-      /* ——— 0.54–0.66 ESTRUCTURAR: arquitectura abierta ——— */
-      // En mobile el copy ya cuenta el beat — el head SVG pelea espacio
-      if (!isMobile) {
-        tl.to(".nv-sys-head", { opacity: 1, duration: 0.08 }, 0.54);
-      }
+      tl.to(".nv-sys-head", { opacity: 1, duration: 0.08 }, 0.54);
       tl.fromTo(".nv-sys-pedidos", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.08 }, 0.55);
       tl.fromTo(".nv-sys-clientes", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.07 }, 0.58);
       tl.fromTo(".nv-sys-pagos", { opacity: 0, x: 16 }, { opacity: 1, x: 0, duration: 0.07 }, 0.6);
-      if (!isMobile) {
-        tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.625);
-        tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.645);
-      }
-
+      tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.625);
+      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.645);
       tl.to(".nv-sys-links", { opacity: 1, duration: 0.08 }, 0.59);
-      if (isMobile) {
-        gsap.set(".nv-link-bottom", { opacity: 0 });
-        gsap.set(".nv-sys-operacion, .nv-sys-reportes", { opacity: 0 });
-      }
 
-      /* ——— 0.66–0.82 CONSTRUIR: satélites se van, hub crece (sin zoom que recorta) ——— */
       copySwap(tl, ".nv-beat-structure", ".nv-beat-build", 0.66);
 
-      if (!isMobile) {
-        tl.to(".nv-sys-head", { opacity: 0, duration: 0.08 }, 0.68);
-      }
+      tl.to(".nv-sys-head", { opacity: 0, duration: 0.08 }, 0.68);
       tl.to(".nv-sys-links", { opacity: 0, duration: 0.08 }, 0.68);
-      tl.to(".nv-sys-clientes", { opacity: 0, x: isMobile ? -24 : -40, duration: 0.1 }, 0.68);
-      tl.to(".nv-sys-pagos", { opacity: 0, x: isMobile ? 24 : 40, duration: 0.1 }, 0.68);
-      if (!isMobile) {
-        tl.to(".nv-sys-operacion", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
-        tl.to(".nv-sys-reportes", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
-      }
+      tl.to(".nv-sys-clientes", { opacity: 0, x: -40, duration: 0.1 }, 0.68);
+      tl.to(".nv-sys-pagos", { opacity: 0, x: 40, duration: 0.1 }, 0.68);
+      tl.to(".nv-sys-operacion", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
+      tl.to(".nv-sys-reportes", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
 
-      // El módulo crece en el espacio abierto — no hay placa que lo corte
       tl.to(
         ".nv-hot-frame",
-        {
-          attr: {
-            height: isMobile ? 260 : 290,
-            width: isMobile ? 280 : 300,
-            x: isMobile ? 330 : 320,
-          },
-          duration: 0.12,
-        },
+        { attr: { height: 290, width: 300, x: 320 }, duration: 0.12 },
         0.7
       );
-      tl.to(
-        ".nv-hot-chrome",
-        { attr: { width: isMobile ? 280 : 300, x: isMobile ? 330 : 320 }, duration: 0.12 },
-        0.7
-      );
+      tl.to(".nv-hot-chrome", { attr: { width: 300, x: 320 }, duration: 0.12 }, 0.7);
       tl.to(".nv-wire", { opacity: 1, duration: 0.1 }, 0.74);
-      tl.to(".nv-sys-pedidos", { x: isMobile ? 0 : 20, y: isMobile ? -8 : -24, duration: 0.12 }, 0.7);
-      // Hold
+      tl.to(".nv-sys-pedidos", { x: 20, y: -24, duration: 0.12 }, 0.7);
       tl.to(".nv-wire", { opacity: 1, duration: 0.06 }, 0.8);
 
-      /* ——— 0.82–0.92 PRODUCTO ——— */
       copySwap(tl, ".nv-beat-build", ".nv-beat-product", 0.82);
 
       tl.to(".nv-sys-pedidos", { opacity: 0, duration: 0.08 }, 0.82);
@@ -406,49 +362,20 @@ export function NarrativeExperience() {
       tl.fromTo(
         ".nv-product",
         { autoAlpha: 0, scale: 0.92, y: 24 },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.1,
-          transformOrigin: "50% 45%",
-        },
+        { autoAlpha: 1, scale: 1, y: 0, duration: 0.1, transformOrigin: "50% 45%" },
         0.84
       );
-      // Hold del producto
       tl.to(".nv-product", { autoAlpha: 1, duration: 0.06 }, 0.9);
 
-      /* ——— 0.92–1.0 LOGO: forge + hold hasta el unpin ——— */
       tl.to(".nv-product", { autoAlpha: 0, scale: 0.97, y: -12, duration: 0.05 }, 0.92);
       tl.to(".nv-beat-product", { autoAlpha: 0, duration: 0.05 }, 0.92);
 
       tl.to(".nv-logo-forge", { autoAlpha: 1, duration: 0.04 }, 0.93);
-      tl.fromTo(
-        ".nv-logo-bar-0",
-        { autoAlpha: 0, y: 10 },
-        { autoAlpha: 1, y: 0, duration: 0.03 },
-        0.935
-      );
-      tl.fromTo(
-        ".nv-logo-bar-1",
-        { autoAlpha: 0, y: 10 },
-        { autoAlpha: 1, y: 0, duration: 0.03 },
-        0.95
-      );
-      tl.fromTo(
-        ".nv-logo-bar-2",
-        { autoAlpha: 0, y: 10 },
-        { autoAlpha: 1, y: 0, duration: 0.03 },
-        0.962
-      );
-      tl.fromTo(
-        ".nv-logo-word",
-        { autoAlpha: 0, y: 6 },
-        { autoAlpha: 1, y: 0, duration: 0.035 },
-        0.972
-      );
+      tl.fromTo(".nv-logo-bar-0", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.03 }, 0.935);
+      tl.fromTo(".nv-logo-bar-1", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.03 }, 0.95);
+      tl.fromTo(".nv-logo-bar-2", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.03 }, 0.962);
+      tl.fromTo(".nv-logo-word", { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.035 }, 0.972);
 
-      // Se queda hasta el final: al soltar el pin entra Capabilities, sin hueco negro
       tl.to(".nv-logo-forge", { autoAlpha: 1, y: 0, duration: 0.02 }, 1);
 
       requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -457,113 +384,109 @@ export function NarrativeExperience() {
     return () => ctx.revert();
   }, [reducedMotion, isMobile]);
 
-  const vh = isMobile ? SCROLL_VH.mobile : SCROLL_VH.desktop;
+  const vh = SCROLL_VH.desktop;
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative bg-[#050505]"
-      style={{ height: reducedMotion ? "auto" : `${vh * 100}vh` }}
-      aria-label="De un problema a un producto"
-    >
-      <div
-        ref={stageRef}
-        className={cn(
-          "relative w-full overflow-hidden",
-          reducedMotion ? "min-h-[100svh]" : "h-[100svh]"
-        )}
-      >
-        <div className="flex h-full w-full flex-col lg:flex-row">
-          {/* Copy: overlay abajo en mobile, columna izquierda en desktop */}
+    <>
+      <div className="md:hidden">
+        <NarrativeMobile />
+      </div>
+
+      <div className="hidden md:block">
+        <section
+          ref={sectionRef}
+          className="relative bg-[#050505]"
+          style={{ height: reducedMotion ? "auto" : `${vh * 100}vh` }}
+          aria-label="De un problema a un producto"
+        >
           <div
+            ref={stageRef}
             className={cn(
-              "pointer-events-none z-20",
-              "absolute inset-x-0 bottom-0 px-5 pt-20",
-              "pb-[max(1.75rem,env(safe-area-inset-bottom))]",
-              "bg-gradient-to-t from-[#050505] from-[42%] via-[#050505]/90 to-transparent",
-              "lg:relative lg:inset-auto lg:flex lg:w-[40%] lg:shrink-0 lg:items-center lg:overflow-hidden",
-              "lg:bg-none lg:px-10 lg:py-0 lg:pb-0 lg:pt-0 xl:w-[42%] xl:px-14"
+              "relative w-full overflow-hidden",
+              reducedMotion ? "min-h-[100svh]" : "h-[100svh]"
             )}
           >
-            <div className="relative w-full max-w-xl">
-              {BEATS.map((beat) => (
-                <div
-                  key={beat.id}
-                  className={cn(
-                    "nv-beat",
-                    `nv-beat-${beat.id}`,
-                    beat.id === "hero"
-                      ? "relative"
-                      : "absolute inset-x-0 bottom-0 lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2"
-                  )}
-                  style={beat.id === "hero" ? undefined : { visibility: "hidden", opacity: 0 }}
-                >
-                  <h2
-                    className={cn(
-                      "font-display font-medium tracking-[-0.045em] text-white",
-                      "text-[1.85rem] leading-[1.07] sm:text-[2.55rem] lg:text-[3.35rem] xl:text-[3.6rem]"
-                    )}
-                  >
-                    {beat.title}
-                  </h2>
-                  {"body" in beat && beat.body ? (
-                    <p className="mt-3 max-w-[28rem] text-[14px] leading-[1.55] text-white/55 sm:mt-7 sm:text-[17px] sm:leading-[1.7]">
-                      {beat.body}
-                    </p>
-                  ) : null}
-                  {"cta" in beat && beat.cta ? (
-                    <div className="mt-6 flex flex-wrap items-baseline gap-x-7 gap-y-3 sm:mt-10 sm:gap-x-10">
-                      <a
-                        href="#servicios"
-                        className="pointer-events-auto text-[15px] text-white transition-opacity hover:opacity-70"
+            <div className="flex h-full w-full flex-col lg:flex-row">
+              <div className="relative z-20 flex w-full shrink-0 items-center overflow-hidden px-5 py-14 sm:px-8 lg:w-[40%] lg:px-10 lg:py-0 xl:w-[42%] xl:px-14">
+                <div className="relative w-full max-w-xl">
+                  {BEATS.map((beat) => (
+                    <div
+                      key={beat.id}
+                      className={cn(
+                        "nv-beat",
+                        `nv-beat-${beat.id}`,
+                        beat.id === "hero"
+                          ? "relative"
+                          : "absolute inset-x-0 top-1/2 -translate-y-1/2"
+                      )}
+                      style={beat.id === "hero" ? undefined : { visibility: "hidden", opacity: 0 }}
+                    >
+                      <h2
+                        className={cn(
+                          "font-display font-medium tracking-[-0.045em] text-white",
+                          "text-[2.35rem] leading-[1.05] sm:text-[2.85rem] lg:text-[3.35rem] xl:text-[3.6rem]"
+                        )}
                       >
-                        Qué hacemos
-                      </a>
-                      <a
-                        href="#contacto"
-                        className="pointer-events-auto text-[14px] text-white/45 transition-colors hover:text-white/75"
-                      >
-                        Hablemos →
-                      </a>
+                        {beat.title}
+                      </h2>
+                      {"body" in beat && beat.body ? (
+                        <p className="mt-7 max-w-[28rem] text-[16px] leading-[1.65] text-white/55 sm:text-[17px] sm:leading-[1.7]">
+                          {beat.body}
+                        </p>
+                      ) : null}
+                      {"cta" in beat && beat.cta ? (
+                        <div className="mt-10 flex flex-wrap items-baseline gap-x-10 gap-y-3">
+                          <a
+                            href="#servicios"
+                            className="pointer-events-auto text-[15px] text-white transition-opacity hover:opacity-70"
+                          >
+                            Qué hacemos
+                          </a>
+                          <a
+                            href="#contacto"
+                            className="pointer-events-auto text-[14px] text-white/45 transition-colors hover:text-white/75"
+                          >
+                            Hablemos →
+                          </a>
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Mundo: panel derecho en desktop, full-bleed detrás del copy en mobile */}
-          <div className="relative z-10 min-h-0 flex-1">
-            <div className="absolute inset-0 overflow-visible">
-              <NarrativeWorld compact={Boolean(isMobile)} />
-              <NarrativeProduct />
+              <div className="relative z-10 min-h-0 flex-1">
+                <div className="absolute inset-0 overflow-visible">
+                  <NarrativeWorld />
+                  <NarrativeProduct />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Logo forjado al centro — cierre de la secuencia */}
-        <div
-          className="nv-logo-forge pointer-events-none absolute inset-0 z-30 flex items-center justify-center"
-          style={{ visibility: "hidden", opacity: 0 }}
-          aria-hidden
-        >
-          <div className="flex items-center gap-3.5">
-            <svg
-              viewBox={MARK_VIEWBOX}
-              className="size-11 text-white sm:size-12"
-              fill="none"
+            <div
+              className="nv-logo-forge pointer-events-none absolute inset-0 z-30 flex items-center justify-center"
+              style={{ visibility: "hidden", opacity: 0 }}
               aria-hidden
             >
-              <path className="nv-logo-bar-0" d={LOGO_BARS[0]} fill="currentColor" />
-              <path className="nv-logo-bar-1" d={LOGO_BARS[1]} fill="currentColor" />
-              <path className="nv-logo-bar-2" d={LOGO_BARS[2]} fill={MARK_PURPLE} />
-            </svg>
-            <span className="nv-logo-word font-display text-[1.35rem] font-medium tracking-[-0.04em] text-white sm:text-[1.5rem]">
-              Metrik
-            </span>
+              <div className="flex items-center gap-3.5">
+                <svg
+                  viewBox={MARK_VIEWBOX}
+                  className="size-11 text-white sm:size-12"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path className="nv-logo-bar-0" d={LOGO_BARS[0]} fill="currentColor" />
+                  <path className="nv-logo-bar-1" d={LOGO_BARS[1]} fill="currentColor" />
+                  <path className="nv-logo-bar-2" d={LOGO_BARS[2]} fill={MARK_PURPLE} />
+                </svg>
+                <span className="nv-logo-word font-display text-[1.35rem] font-medium tracking-[-0.04em] text-white sm:text-[1.5rem]">
+                  Metrik
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
-    </section>
+    </>
   );
 }
