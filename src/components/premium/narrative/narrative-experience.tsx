@@ -17,7 +17,7 @@ const LOGO_BARS = [
   "M50.61 57.35 L50.61 17.99 L62.06 6.65 L62.06 45.8 Z",
 ] as const;
 
-const SCROLL_VH = { desktop: 9.8, mobile: 7.4 };
+const SCROLL_VH = { desktop: 9.8, mobile: 8.2 };
 
 const BEATS = [
   {
@@ -101,11 +101,27 @@ function prepDraws(root: HTMLElement) {
 function prepThinkLine(line: SVGPathElement) {
   const len = line.getTotalLength();
   if (!len || !Number.isFinite(len)) return 0;
-  // Empieza en cero: sin trazo visible
   line.setAttribute("stroke-dasharray", `${len}`);
   line.setAttribute("stroke-dashoffset", `${len}`);
   gsap.set(line, { attr: { "stroke-dashoffset": len } });
   return len;
+}
+
+/** Progreso 0–1 del path más cercano a un punto (para revelar nodos al llegar). */
+function pathRatioNear(line: SVGPathElement, len: number, x: number, y: number) {
+  let bestT = 0;
+  let bestD = Number.POSITIVE_INFINITY;
+  const steps = 240;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const pt = line.getPointAtLength(t * len);
+    const d = (pt.x - x) ** 2 + (pt.y - y) ** 2;
+    if (d < bestD) {
+      bestD = d;
+      bestT = t;
+    }
+  }
+  return bestT;
 }
 
 /** Copia izquierda — sale completa antes de que entre la siguiente. */
@@ -163,7 +179,7 @@ export function NarrativeExperience() {
       const lineLen = line ? prepThinkLine(line) : 0;
 
       gsap.set(".nv-frag-axis", { opacity: 0 });
-      gsap.set(".nv-frag-chaos", { opacity: 1 });
+      gsap.set(".nv-frag-chaos", { opacity: 0 });
       gsap.set(".nv-frag", { x: 0, y: 0, opacity: 1 });
       gsap.set(".nv-sys", { opacity: 0, x: 0, y: 0, scale: 1 });
       gsap.set(".nv-axis-stage", { opacity: 0 });
@@ -171,7 +187,13 @@ export function NarrativeExperience() {
       gsap.set(".nv-sys-links", { opacity: 0 });
       gsap.set(".nv-wire", { opacity: 0 });
       gsap.set(".nv-hot-frame", { attr: { height: 220, y: 270 } });
-      gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "470 380" });
+      gsap.set(".nv-camera", {
+        x: 0,
+        y: isMobile ? -28 : 0,
+        scale: isMobile ? 0.96 : 1,
+        opacity: 1,
+        svgOrigin: "470 380",
+      });
       gsap.set(".nv-product", {
         autoAlpha: 0,
         scale: 0.92,
@@ -185,17 +207,22 @@ export function NarrativeExperience() {
       });
       gsap.set(".nv-beat", { autoAlpha: 0 });
       gsap.set(".nv-beat-hero", { autoAlpha: 1 });
-      gsap.set(".nv-need", { opacity: 1 });
-      gsap.set(".nv-atmosphere", { opacity: 0.9 });
-      gsap.set(".nv-annos", { opacity: 0.35 });
-      gsap.set(".nv-deadends", { opacity: 0.35 });
+      // Primer frame: solo atmósfera + trazo naciendo. Sin copy a la derecha.
+      gsap.set(".nv-need", { opacity: 0 });
+      gsap.set(".nv-atmosphere", { opacity: isMobile ? 0.35 : 0.55 });
+      gsap.set(".nv-annos", { opacity: 0 });
+      gsap.set(".nv-deadends", { opacity: 0 });
       gsap.set(".nv-think", { opacity: 1 });
       gsap.set(".nv-think-glow", { opacity: 0 });
       gsap.set(".nv-pulse-ring", { opacity: 0 });
-      gsap.set(".nv-frag-halo", { opacity: 0.15 });
-      gsap.set(".nv-frag-chaos", { opacity: 0.2 });
-      gsap.set(".nv-frag-tick", { opacity: 0.15 });
-      gsap.set(".nv-frag-tag", { opacity: 0.35 });
+      gsap.set(".nv-frag-halo", { opacity: 0 });
+      gsap.set(".nv-frag-chaos", { opacity: 0 });
+      gsap.set(".nv-frag-evidence", { opacity: 0 });
+      gsap.set(".nv-frag-tick", { opacity: 0 });
+      gsap.set(".nv-frag-tag", { opacity: 0 });
+      gsap.set(".nv-frag-core", { opacity: 0 });
+      gsap.set(".nv-frag-dot", { fillOpacity: 0 });
+      if (pulse) gsap.set(pulse, { autoAlpha: 0.7 });
 
       const traveler = { p: 0 };
       const placePulse = () => {
@@ -210,15 +237,26 @@ export function NarrativeExperience() {
         }
       };
       placePulse();
-      if (pulse) gsap.set(pulse, { autoAlpha: 1 });
 
-      // Glow bajo el trazo: mismo dash que la línea (empieza vacío)
       const glow = stage.querySelector<SVGPathElement>(".nv-think-glow");
       if (glow && lineLen > 0) {
         glow.setAttribute("stroke-dasharray", `${lineLen}`);
         glow.setAttribute("stroke-dashoffset", `${lineLen}`);
         gsap.set(glow, { attr: { "stroke-dashoffset": lineLen }, opacity: 0 });
       }
+
+      // Cada nodo se enciende cuando el trazo lo alcanza (no antes)
+      const DRAW = 0.26;
+      const fragRatios =
+        line && lineLen > 0
+          ? [0, 1, 2, 3].map((i) => {
+              const dot = stage.querySelector<SVGCircleElement>(`.nv-frag-${i} .nv-frag-dot`);
+              if (!dot) return (i + 1) / 4;
+              const x = Number(dot.getAttribute("cx"));
+              const y = Number(dot.getAttribute("cy"));
+              return pathRatioNear(line, lineLen, x, y);
+            })
+          : [0.25, 0.5, 0.75, 1];
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -233,53 +271,53 @@ export function NarrativeExperience() {
         },
       });
 
-      /* ——— 0–0.26 OBSERVAR: trazo desde cero + nodos que se “descubren” ——— */
+      /* ——— 0–0.26 OBSERVAR: trazo pasa por cada punto y recién ahí lo revela ——— */
       copySwap(tl, ".nv-beat-hero", ".nv-beat-observe", 0.08);
+      tl.to(".nv-atmosphere", { opacity: 0.85, duration: 0.06 }, 0);
+      tl.to(pulse, { autoAlpha: 1, duration: 0.04 }, 0.01);
+
       if (line && lineLen > 0) {
         tl.fromTo(
           line,
           { attr: { "stroke-dashoffset": lineLen } },
-          { attr: { "stroke-dashoffset": 0 }, duration: 0.26 },
+          { attr: { "stroke-dashoffset": 0 }, duration: DRAW },
           0
         );
         if (glow) {
           tl.fromTo(
             glow,
             { attr: { "stroke-dashoffset": lineLen }, opacity: 0 },
-            { attr: { "stroke-dashoffset": 0 }, opacity: 0.55, duration: 0.26 },
+            { attr: { "stroke-dashoffset": 0 }, opacity: 0.55, duration: DRAW },
             0
           );
         }
-        tl.fromTo(traveler, { p: 0 }, { p: 1, duration: 0.26, onUpdate: placePulse }, 0);
+        tl.fromTo(traveler, { p: 0 }, { p: 1, duration: DRAW, onUpdate: placePulse }, 0);
       }
       tl.to(".nv-pulse-ring", { opacity: 0.75, duration: 0.04 }, 0.02);
-      tl.to(".nv-annos", { opacity: 1, duration: 0.1 }, 0.04);
-      tl.to(".nv-deadends", { opacity: 0.9, duration: 0.12 }, 0.06);
+      if (!isMobile) {
+        tl.to(".nv-deadends", { opacity: 0.7, duration: 0.1 }, 0.07);
+        tl.to(".nv-annos", { opacity: 0.85, duration: 0.1 }, 0.09);
+      }
 
-      // Cada síntoma gana presencia cuando el criterio lo alcanza
-      tl.to(".nv-frag-0 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.055);
-      tl.to(".nv-frag-0 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.055);
-      tl.to(".nv-frag-0 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.055);
-      tl.to(".nv-frag-0 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.055);
+      const revealFrag = (i: number, at: number) => {
+        tl.to(`.nv-frag-${i} .nv-frag-dot`, { fillOpacity: 1, duration: 0.025 }, at);
+        tl.to(`.nv-frag-${i} .nv-frag-core`, { opacity: 1, duration: 0.025 }, at);
+        tl.to(`.nv-frag-${i} .nv-frag-halo`, { opacity: 0.95, duration: 0.03 }, at);
+        tl.to(`.nv-frag-${i} .nv-frag-tick`, { opacity: 0.9, duration: 0.03 }, at);
+        tl.to(`.nv-frag-${i} .nv-frag-tag`, { opacity: 1, duration: 0.035 }, at);
+        tl.to(`.nv-frag-${i} .nv-frag-chaos`, { opacity: 1, duration: 0.04 }, at);
+        if (!isMobile) {
+          tl.to(`.nv-frag-${i} .nv-frag-evidence`, { opacity: 1, duration: 0.04 }, at + 0.008);
+        }
+      };
+      fragRatios.forEach((ratio, i) => {
+        // Un pelo después de tocar el waypoint, para que el trazo ya esté debajo
+        const at = Math.min(DRAW - 0.01, Math.max(0.02, ratio * DRAW + 0.008));
+        revealFrag(i, at);
+      });
 
-      tl.to(".nv-frag-1 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.11);
-      tl.to(".nv-frag-1 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.11);
-      tl.to(".nv-frag-1 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.11);
-      tl.to(".nv-frag-1 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.11);
-
-      tl.to(".nv-frag-2 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.165);
-      tl.to(".nv-frag-2 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.165);
-      tl.to(".nv-frag-2 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.165);
-      tl.to(".nv-frag-2 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.165);
-
-      tl.to(".nv-frag-3 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.22);
-      tl.to(".nv-frag-3 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.22);
-      tl.to(".nv-frag-3 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.22);
-      tl.to(".nv-frag-3 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.22);
-
-      // Al cerrar el trazo, el ruido periférico baja — ya vimos el patrón
-      tl.to(".nv-annos", { opacity: 0.45, duration: 0.08 }, 0.2);
-      tl.to(".nv-deadends", { opacity: 0.35, duration: 0.08 }, 0.2);
+      tl.to(".nv-annos", { opacity: isMobile ? 0 : 0.55, duration: 0.08 }, 0.2);
+      tl.to(".nv-deadends", { opacity: isMobile ? 0 : 0.4, duration: 0.08 }, 0.2);
 
       /* ——— 0.26–0.46 ENTENDER: criterios con peso editorial ——— */
       copySwap(tl, ".nv-beat-observe", ".nv-beat-understand", 0.26);
@@ -292,61 +330,70 @@ export function NarrativeExperience() {
       tl.to(".nv-think-glow", { opacity: 0, duration: 0.08 }, 0.28);
       tl.to(pulse, { autoAlpha: 0, duration: 0.08 }, 0.28);
       tl.to(".nv-pulse-ring", { opacity: 0, duration: 0.06 }, 0.28);
-      tl.to(".nv-frag-tag", { opacity: 0, duration: 0.06 }, 0.3);
-      tl.to(".nv-frag-tick", { opacity: 0, duration: 0.06 }, 0.3);
-      tl.to(".nv-frag-halo", { opacity: 0, duration: 0.08 }, 0.3);
-      tl.to(".nv-frag-3", { opacity: 0, duration: 0.08 }, 0.28);
 
-      // Tres columnas alineadas
-      tl.to(".nv-frag-0", { x: -10, y: 35, duration: 0.14 }, 0.28);
-      tl.to(".nv-frag-1", { x: -20, y: 115, duration: 0.14 }, 0.28);
-      tl.to(".nv-frag-2", { x: 10, y: -50, duration: 0.14 }, 0.28);
-
-      tl.to(".nv-frag-0 .nv-frag-chaos", { opacity: 0, duration: 0.06 }, 0.34);
-      tl.to(".nv-frag-1 .nv-frag-chaos", { opacity: 0, duration: 0.06 }, 0.35);
-      tl.to(".nv-frag-2 .nv-frag-chaos", { opacity: 0, duration: 0.06 }, 0.36);
-
-      tl.to(".nv-frag-0 .nv-frag-axis", { opacity: 1, duration: 0.08 }, 0.35);
-      tl.to(".nv-frag-1 .nv-frag-axis", { opacity: 1, duration: 0.08 }, 0.37);
-      tl.to(".nv-frag-2 .nv-frag-axis", { opacity: 1, duration: 0.08 }, 0.39);
-
-      tl.to(".nv-frag-dot", { attr: { r: 4 }, fillOpacity: 1, duration: 0.08 }, 0.36);
-
-      tl.to(".nv-axis-stage", { opacity: 1, duration: 0.08 }, 0.38);
-      tl.to(".nv-axis-spine", { attr: { "stroke-dashoffset": 0 }, duration: 0.12 }, 0.4);
+      // Salen los síntomas; entran criterios ya dibujados sobre la curva (mismas coords)
+      tl.to(".nv-frag", { opacity: 0, duration: 0.1 }, 0.28);
+      tl.to(".nv-axis-stage", { opacity: 1, duration: 0.1 }, 0.32);
+      tl.to(".nv-axis-spine", { attr: { "stroke-dashoffset": 0 }, duration: 0.14 }, 0.34);
 
       /* ——— 0.46–0.54 HANDOFF limpio ——— */
       copySwap(tl, ".nv-beat-understand", ".nv-beat-structure", 0.46);
 
-      tl.to(".nv-frag", { opacity: 0, duration: 0.08 }, 0.46);
       tl.to(".nv-axis-stage", { opacity: 0, duration: 0.08 }, 0.46);
 
       /* ——— 0.54–0.66 ESTRUCTURAR: arquitectura abierta ——— */
-      tl.to(".nv-sys-head", { opacity: 1, duration: 0.08 }, 0.54);
+      // En mobile el copy ya cuenta el beat — el head SVG pelea espacio
+      if (!isMobile) {
+        tl.to(".nv-sys-head", { opacity: 1, duration: 0.08 }, 0.54);
+      }
       tl.fromTo(".nv-sys-pedidos", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.08 }, 0.55);
       tl.fromTo(".nv-sys-clientes", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.07 }, 0.58);
       tl.fromTo(".nv-sys-pagos", { opacity: 0, x: 16 }, { opacity: 1, x: 0, duration: 0.07 }, 0.6);
-      tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.625);
-      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.645);
+      if (!isMobile) {
+        tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.625);
+        tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.645);
+      }
 
-      tl.to(".nv-sys-links", { opacity: 1, duration: 0.06 }, 0.59);
-      tl.to(".nv-sys-links .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.1, stagger: 0.02 }, 0.59);
+      tl.to(".nv-sys-links", { opacity: 1, duration: 0.08 }, 0.59);
+      if (isMobile) {
+        gsap.set(".nv-link-bottom", { opacity: 0 });
+        gsap.set(".nv-sys-operacion, .nv-sys-reportes", { opacity: 0 });
+      }
 
       /* ——— 0.66–0.82 CONSTRUIR: satélites se van, hub crece (sin zoom que recorta) ——— */
       copySwap(tl, ".nv-beat-structure", ".nv-beat-build", 0.66);
 
-      tl.to(".nv-sys-head", { opacity: 0, duration: 0.08 }, 0.68);
+      if (!isMobile) {
+        tl.to(".nv-sys-head", { opacity: 0, duration: 0.08 }, 0.68);
+      }
       tl.to(".nv-sys-links", { opacity: 0, duration: 0.08 }, 0.68);
-      tl.to(".nv-sys-clientes", { opacity: 0, x: -40, duration: 0.1 }, 0.68);
-      tl.to(".nv-sys-pagos", { opacity: 0, x: 40, duration: 0.1 }, 0.68);
-      tl.to(".nv-sys-operacion", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
-      tl.to(".nv-sys-reportes", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
+      tl.to(".nv-sys-clientes", { opacity: 0, x: isMobile ? -24 : -40, duration: 0.1 }, 0.68);
+      tl.to(".nv-sys-pagos", { opacity: 0, x: isMobile ? 24 : 40, duration: 0.1 }, 0.68);
+      if (!isMobile) {
+        tl.to(".nv-sys-operacion", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
+        tl.to(".nv-sys-reportes", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
+      }
 
       // El módulo crece en el espacio abierto — no hay placa que lo corte
-      tl.to(".nv-hot-frame", { attr: { height: 290, width: 300, x: 320 }, duration: 0.12 }, 0.7);
-      tl.to(".nv-hot-chrome", { attr: { width: 300, x: 320 }, duration: 0.12 }, 0.7);
+      tl.to(
+        ".nv-hot-frame",
+        {
+          attr: {
+            height: isMobile ? 260 : 290,
+            width: isMobile ? 280 : 300,
+            x: isMobile ? 330 : 320,
+          },
+          duration: 0.12,
+        },
+        0.7
+      );
+      tl.to(
+        ".nv-hot-chrome",
+        { attr: { width: isMobile ? 280 : 300, x: isMobile ? 330 : 320 }, duration: 0.12 },
+        0.7
+      );
       tl.to(".nv-wire", { opacity: 1, duration: 0.1 }, 0.74);
-      tl.to(".nv-sys-pedidos", { x: isMobile ? 0 : 20, y: isMobile ? -10 : -24, duration: 0.12 }, 0.7);
+      tl.to(".nv-sys-pedidos", { x: isMobile ? 0 : 20, y: isMobile ? -8 : -24, duration: 0.12 }, 0.7);
       // Hold
       tl.to(".nv-wire", { opacity: 1, duration: 0.06 }, 0.8);
 
@@ -427,7 +474,17 @@ export function NarrativeExperience() {
         )}
       >
         <div className="flex h-full w-full flex-col lg:flex-row">
-          <div className="relative z-20 flex w-full shrink-0 items-center overflow-hidden px-5 py-14 sm:px-8 lg:w-[40%] lg:px-10 lg:py-0 xl:w-[42%] xl:px-14">
+          {/* Copy: overlay abajo en mobile, columna izquierda en desktop */}
+          <div
+            className={cn(
+              "pointer-events-none z-20",
+              "absolute inset-x-0 bottom-0 px-5 pt-20",
+              "pb-[max(1.75rem,env(safe-area-inset-bottom))]",
+              "bg-gradient-to-t from-[#050505] from-[42%] via-[#050505]/90 to-transparent",
+              "lg:relative lg:inset-auto lg:flex lg:w-[40%] lg:shrink-0 lg:items-center lg:overflow-hidden",
+              "lg:bg-none lg:px-10 lg:py-0 lg:pb-0 lg:pt-0 xl:w-[42%] xl:px-14"
+            )}
+          >
             <div className="relative w-full max-w-xl">
               {BEATS.map((beat) => (
                 <div
@@ -435,25 +492,27 @@ export function NarrativeExperience() {
                   className={cn(
                     "nv-beat",
                     `nv-beat-${beat.id}`,
-                    beat.id === "hero" ? "relative" : "absolute inset-x-0 top-1/2 -translate-y-1/2"
+                    beat.id === "hero"
+                      ? "relative"
+                      : "absolute inset-x-0 bottom-0 lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2"
                   )}
                   style={beat.id === "hero" ? undefined : { visibility: "hidden", opacity: 0 }}
                 >
                   <h2
                     className={cn(
                       "font-display font-medium tracking-[-0.045em] text-white",
-                      "text-[2.35rem] leading-[1.05] sm:text-[2.85rem] lg:text-[3.35rem] xl:text-[3.6rem]"
+                      "text-[1.85rem] leading-[1.07] sm:text-[2.55rem] lg:text-[3.35rem] xl:text-[3.6rem]"
                     )}
                   >
                     {beat.title}
                   </h2>
                   {"body" in beat && beat.body ? (
-                    <p className="mt-7 max-w-[28rem] text-[16px] leading-[1.65] text-white/55 sm:text-[17px] sm:leading-[1.7]">
+                    <p className="mt-3 max-w-[28rem] text-[14px] leading-[1.55] text-white/55 sm:mt-7 sm:text-[17px] sm:leading-[1.7]">
                       {beat.body}
                     </p>
                   ) : null}
                   {"cta" in beat && beat.cta ? (
-                    <div className="mt-10 flex flex-wrap items-baseline gap-x-10 gap-y-3">
+                    <div className="mt-6 flex flex-wrap items-baseline gap-x-7 gap-y-3 sm:mt-10 sm:gap-x-10">
                       <a
                         href="#servicios"
                         className="pointer-events-auto text-[15px] text-white transition-opacity hover:opacity-70"
@@ -473,9 +532,10 @@ export function NarrativeExperience() {
             </div>
           </div>
 
-          <div className="relative z-10 min-h-[44vh] flex-1 lg:min-h-0">
+          {/* Mundo: panel derecho en desktop, full-bleed detrás del copy en mobile */}
+          <div className="relative z-10 min-h-0 flex-1">
             <div className="absolute inset-0 overflow-visible">
-              <NarrativeWorld />
+              <NarrativeWorld compact={Boolean(isMobile)} />
               <NarrativeProduct />
             </div>
           </div>

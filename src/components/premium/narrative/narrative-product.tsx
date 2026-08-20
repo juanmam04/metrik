@@ -7,10 +7,10 @@
 export function NarrativeProduct() {
   return (
     <div
-      className="nv-product pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-5 sm:p-8 lg:p-6 xl:p-8"
+      className="nv-product pointer-events-none absolute inset-0 z-20 flex items-end justify-center px-4 pb-36 pt-16 sm:items-center sm:p-8 lg:p-6 xl:p-8"
       style={{ opacity: 0, visibility: "hidden" }}
     >
-      <div className="flex aspect-[16/10] w-full max-w-[920px] overflow-hidden rounded-[12px] border border-white/[0.12] bg-[#0b0b0d] shadow-[0_40px_100px_rgba(0,0,0,0.55)]">
+      <div className="flex max-h-[min(52svh,380px)] w-full max-w-[920px] flex-col overflow-hidden rounded-[12px] border border-white/[0.12] bg-[#0b0b0d] shadow-[0_40px_100px_rgba(0,0,0,0.55)] sm:max-h-none sm:aspect-[16/10] sm:flex-row lg:max-h-[min(78vh,640px)]">
         <aside className="hidden w-14 shrink-0 flex-col items-center gap-5 border-r border-white/[0.07] py-5 sm:flex">
           <span className="size-1.5 rounded-full bg-accent" />
           <span className="size-1.5 rounded-full bg-white/20" />
@@ -18,32 +18,38 @@ export function NarrativeProduct() {
           <span className="size-1.5 rounded-full bg-white/20" />
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-11 items-center justify-between border-b border-white/[0.07] px-4">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <header className="flex h-11 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
             <p className="text-[13px] tracking-[-0.03em] text-white/85">Pedidos</p>
             <p className="font-mono text-[10px] tracking-[0.08em] text-accent/70">#1842 · En curso</p>
           </header>
 
-          <div className="grid flex-1 grid-cols-12 gap-2 p-3 sm:gap-2.5 sm:p-3.5">
-            <div className="col-span-4 rounded-md border border-white/[0.07] bg-white/[0.025] px-3 py-2.5">
+          <div className="grid flex-1 grid-cols-2 gap-2 overflow-auto p-3 sm:grid-cols-12 sm:gap-2.5 sm:p-3.5">
+            <div className="col-span-1 rounded-md border border-white/[0.07] bg-white/[0.025] px-3 py-2.5 sm:col-span-4">
               <p className="font-mono text-[9px] tracking-[0.14em] text-white/35 uppercase">Cliente</p>
-              <p className="mt-1.5 font-display text-lg tracking-[-0.05em] text-white">Vinculado</p>
+              <p className="mt-1.5 font-display text-base tracking-[-0.05em] text-white sm:text-lg">
+                Vinculado
+              </p>
             </div>
-            <div className="col-span-4 rounded-md border border-accent/40 bg-accent/[0.08] px-3 py-2.5">
+            <div className="col-span-1 rounded-md border border-accent/40 bg-accent/[0.08] px-3 py-2.5 sm:col-span-4">
               <p className="font-mono text-[9px] tracking-[0.14em] text-accent/85 uppercase">Estado</p>
-              <p className="mt-1.5 font-display text-lg tracking-[-0.05em] text-white">En curso</p>
+              <p className="mt-1.5 font-display text-base tracking-[-0.05em] text-white sm:text-lg">
+                En curso
+              </p>
             </div>
-            <div className="col-span-4 rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
+            <div className="col-span-2 rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2.5 sm:col-span-4">
               <p className="font-mono text-[9px] tracking-[0.14em] text-white/35 uppercase">Pago</p>
-              <p className="mt-1.5 font-display text-lg tracking-[-0.05em] text-white">Pendiente</p>
+              <p className="mt-1.5 font-display text-base tracking-[-0.05em] text-white sm:text-lg">
+                Pendiente
+              </p>
             </div>
 
-            <div className="col-span-7 rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-3">
+            <div className="col-span-2 rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-3 sm:col-span-7">
               <p className="font-mono text-[9px] tracking-[0.14em] text-white/35 uppercase">Flujo</p>
-              <p className="mt-3 text-[12px] text-white/55">
+              <p className="mt-2 text-[12px] text-white/55 sm:mt-3">
                 Cliente → <span className="text-accent">Pedido</span> → Estado → Pago → Entrega
               </p>
-              <div className="mt-4 space-y-2">
+              <div className="mt-3 space-y-2 sm:mt-4">
                 {[
                   ["#1842", "En curso"],
                   ["#1839", "Pago"],
@@ -60,7 +66,7 @@ export function NarrativeProduct() {
               </div>
             </div>
 
-            <div className="col-span-5 rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-3">
+            <div className="col-span-2 hidden rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-3 sm:col-span-5 sm:block">
               <p className="font-mono text-[9px] tracking-[0.14em] text-white/35 uppercase">Historial</p>
               <div className="mt-3 space-y-2">
                 <div className="h-1 w-4/5 rounded-full bg-white/[0.08]" />

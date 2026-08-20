@@ -32,7 +32,7 @@ const PRINCIPLES = [
 export function PrinciplesSection() {
   return (
     <section
-      className="relative border-t border-white/[0.06] py-28 md:py-36"
+      className="relative border-t border-white/[0.06] py-20 md:py-36"
       aria-labelledby="principles-title"
     >
       <Container>

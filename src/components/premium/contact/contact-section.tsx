@@ -7,30 +7,68 @@ import { Container } from "@/components/ui/container";
 import { PrimaryButton } from "@/components/ui/metrik-button";
 import { easeOutExpo } from "@/lib/easing";
 
-export function ContactSection() {
-  const [sent, setSent] = useState(false);
+type Status = "idle" | "sending" | "sent" | "error";
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+export function ContactSection() {
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!ACCESS_KEY) {
+      setStatus("error");
+      setError("El formulario todavía no está configurado.");
+      return;
+    }
+
     const form = event.currentTarget;
     const data = new FormData(form);
-    const name = String(data.get("name") ?? "");
-    const email = String(data.get("email") ?? "");
-    const message = String(data.get("message") ?? "");
 
-    const subject = encodeURIComponent("Consulta — Metrik");
-    const body = encodeURIComponent(
-      `Nombre: ${name}\nEmail: ${email}\n\n${message}`
-    );
+    // Honeypot: si un bot lo llenó, fingimos éxito
+    if (String(data.get("website") ?? "").trim()) {
+      setStatus("sent");
+      form.reset();
+      return;
+    }
 
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-    setSent(true);
+    data.delete("website");
+    data.append("access_key", ACCESS_KEY);
+    data.append("subject", "Consulta — Metrik");
+    data.append("from_name", "Metrik");
+
+    setStatus("sending");
+    setError("");
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: data,
+      });
+      const payload = (await res.json().catch(() => null)) as
+        | { success?: boolean; message?: string }
+        | null;
+
+      if (!res.ok || !payload?.success) {
+        setStatus("error");
+        setError(payload?.message || "No se pudo enviar. Probá de nuevo.");
+        return;
+      }
+
+      form.reset();
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+      setError("No se pudo enviar. Probá de nuevo.");
+    }
   };
 
   return (
     <section
       id="contacto"
-      className="relative border-t border-white/[0.06] py-28 md:py-36 lg:py-44"
+      className="relative border-t border-white/[0.06] py-20 md:py-36 lg:py-44"
       aria-labelledby="contact-title"
     >
       <Container>
@@ -56,11 +94,17 @@ export function ContactSection() {
             transition={{ duration: 0.6, ease: easeOutExpo }}
             className="space-y-5"
           >
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden
+              className="absolute -left-[9999px] h-0 w-0 opacity-0"
+            />
+
             <div>
-              <label
-                htmlFor="contact-name"
-                className="mb-2 block text-sm text-white/45"
-              >
+              <label htmlFor="contact-name" className="mb-2 block text-sm text-white/45">
                 Nombre
               </label>
               <input
@@ -69,14 +113,12 @@ export function ContactSection() {
                 type="text"
                 required
                 autoComplete="name"
-                className="h-11 w-full rounded-lg border border-white/[0.1] bg-white/[0.03] px-4 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:ring-2 focus:ring-accent/20"
+                disabled={status === "sending"}
+                className="h-11 w-full rounded-lg border border-white/[0.1] bg-white/[0.03] px-4 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:ring-2 focus:ring-accent/20 disabled:opacity-50"
               />
             </div>
             <div>
-              <label
-                htmlFor="contact-email"
-                className="mb-2 block text-sm text-white/45"
-              >
+              <label htmlFor="contact-email" className="mb-2 block text-sm text-white/45">
                 Email
               </label>
               <input
@@ -85,14 +127,12 @@ export function ContactSection() {
                 type="email"
                 required
                 autoComplete="email"
-                className="h-11 w-full rounded-lg border border-white/[0.1] bg-white/[0.03] px-4 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:ring-2 focus:ring-accent/20"
+                disabled={status === "sending"}
+                className="h-11 w-full rounded-lg border border-white/[0.1] bg-white/[0.03] px-4 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:ring-2 focus:ring-accent/20 disabled:opacity-50"
               />
             </div>
             <div>
-              <label
-                htmlFor="contact-message"
-                className="mb-2 block text-sm text-white/45"
-              >
+              <label htmlFor="contact-message" className="mb-2 block text-sm text-white/45">
                 ¿Qué necesitás resolver?
               </label>
               <textarea
@@ -100,15 +140,27 @@ export function ContactSection() {
                 name="message"
                 required
                 rows={4}
-                className="w-full resize-none rounded-lg border border-white/[0.1] bg-white/[0.03] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:ring-2 focus:ring-accent/20"
+                disabled={status === "sending"}
+                className="w-full resize-none rounded-lg border border-white/[0.1] bg-white/[0.03] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:ring-2 focus:ring-accent/20 disabled:opacity-50"
               />
             </div>
-            <PrimaryButton type="submit" className="w-full sm:w-auto">
-              Contanos →
+
+            <PrimaryButton
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={status === "sending"}
+            >
+              {status === "sending" ? "Enviando…" : "Contanos →"}
             </PrimaryButton>
-            {sent ? (
-              <p className="text-sm text-white/40" role="status">
-                Se abrirá tu cliente de correo para completar el envío.
+
+            {status === "sent" ? (
+              <p className="text-sm text-white/55" role="status">
+                Listo. Te respondemos a la brevedad.
+              </p>
+            ) : null}
+            {status === "error" ? (
+              <p className="text-sm text-red-300/80" role="alert">
+                {error}
               </p>
             ) : null}
           </motion.form>

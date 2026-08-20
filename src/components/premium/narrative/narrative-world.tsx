@@ -1,18 +1,47 @@
 const FONT = "var(--font-display), system-ui, sans-serif";
 const MONO = "var(--font-mono), ui-monospace, monospace";
 
-/** Waypoints del pensamiento — curva suave, sin ángulos. */
-const THINK = [
-  { x: 110, y: 268 },
-  { x: 230, y: 400 },
-  { x: 470, y: 310 },
-  { x: 700, y: 470 },
-  { x: 380, y: 650 },
+/** Waypoints del pensamiento — el trazo pasa por cada uno. */
+export const THINK = [
+  { x: 120, y: 240 }, // origen
+  { x: 220, y: 400 }, // Información dispersa
+  { x: 460, y: 300 }, // Procesos manuales
+  { x: 640, y: 455 }, // Seguimiento difícil
+  { x: 380, y: 660 }, // Trabajo duplicado
+] as const;
+
+/** Columnas de criterios — curva que pasa por cada nodo. */
+export const AXIS_LAYOUT = [
+  {
+    x: 210,
+    y: 460,
+    num: "01",
+    axis: "CENTRALIZAR",
+    chaos: "Información dispersa",
+    detail: "Una sola fuente de verdad",
+  },
+  {
+    x: 450,
+    y: 390,
+    num: "02",
+    axis: "AUTOMATIZAR",
+    chaos: "Procesos manuales",
+    detail: "Flujos que corren solos",
+  },
+  {
+    x: 690,
+    y: 470,
+    num: "03",
+    axis: "ENTENDER",
+    chaos: "Seguimiento difícil",
+    detail: "Visibilidad continua",
+  },
 ] as const;
 
 const FRAGS = [
   {
     chaos: "Información dispersa",
+    evidence: "planillas · chats · mail",
     axis: "CENTRALIZAR",
     detail: "Una sola fuente de verdad",
     num: "01",
@@ -22,6 +51,7 @@ const FRAGS = [
   },
   {
     chaos: "Procesos manuales",
+    evidence: "copiar · pegar · avisar",
     axis: "AUTOMATIZAR",
     detail: "Flujos que corren solos",
     num: "02",
@@ -31,25 +61,27 @@ const FRAGS = [
   },
   {
     chaos: "Seguimiento difícil",
+    evidence: "nadie ve el estado",
     axis: "ENTENDER",
     detail: "Visibilidad continua",
     num: "03",
     i: 3,
     tag: "C",
-    side: "right" as const,
+    side: "left" as const, // label hacia adentro — evita corte en el borde derecho
   },
   {
     chaos: "Trabajo duplicado",
+    evidence: "tres versiones vivas",
     axis: null,
     detail: null,
-    num: null,
+    num: "04",
     i: 4,
     tag: "D",
     side: "left" as const,
   },
 ] as const;
 
-/** Catmull-Rom → cubic Bezier continuo. */
+/** Catmull-Rom → cubic Bezier (pasa exactamente por cada waypoint). */
 function curveThrough(points: readonly { x: number; y: number }[]) {
   const p = points.map((pt) => ({ x: pt.x, y: pt.y }));
   if (p.length < 2) return "";
@@ -59,26 +91,63 @@ function curveThrough(points: readonly { x: number; y: number }[]) {
     const p1 = p[i];
     const p2 = p[i + 1];
     const p3 = p[i + 2] ?? p[i + 1];
-    const cp1x = p1.x + (p2.x - p0.x) / 5;
-    const cp1y = p1.y + (p2.y - p0.y) / 5;
-    const cp2x = p2.x - (p3.x - p1.x) / 5;
-    const cp2y = p2.y - (p3.y - p1.y) / 5;
-    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x} ${p2.y}`;
+    // /6 = Catmull-Rom uniforme: el segmento termina exactamente en p2
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
   }
   return d;
 }
 
 const THINK_PATH = curveThrough(THINK);
 
+/** Curva cuadrática entre dos puertos (inicio y fin exactos). */
+function linkCurve(
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+  bend: number
+) {
+  const mx = (a.x + b.x) / 2;
+  const my = (a.y + b.y) / 2;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const cx = mx + (-dy / len) * bend;
+  const cy = my + (dx / len) * bend;
+  return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
+}
+
+/** Puertos de las cards del sistema — mismos bordes que los rects. */
+const SYS_PORTS = {
+  clientesOut: { x: 268, y: 360 },
+  pedidosInL: { x: 340, y: 380 },
+  pedidosInR: { x: 600, y: 380 },
+  pedidosOutBL: { x: 400, y: 490 },
+  pedidosOutBR: { x: 540, y: 490 },
+  pagosIn: { x: 680, y: 360 },
+  operacionIn: { x: 238, y: 560 },
+  reportesIn: { x: 668, y: 560 },
+} as const;
+const AXIS_SPINE = curveThrough([
+  { x: 110, y: 420 },
+  { x: AXIS_LAYOUT[0].x, y: AXIS_LAYOUT[0].y },
+  { x: AXIS_LAYOUT[1].x, y: AXIS_LAYOUT[1].y },
+  { x: AXIS_LAYOUT[2].x, y: AXIS_LAYOUT[2].y },
+  { x: 790, y: 430 },
+]);
+
 /**
  * Un solo mundo SVG. Los mismos nodos mutan de caos → ejes → sistema → módulo.
  * Sistema: arquitectura abierta (sin placa contenedora) — hub + satélites.
  */
-export function NarrativeWorld() {
+export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
   return (
     <svg
       className="nv-world pointer-events-none h-full w-full overflow-visible"
-      viewBox="40 40 820 780"
+      // Mobile: meet (no slice) para que los 3 ejes y el sistema no se corten a los costados
+      viewBox={compact ? "60 60 780 720" : "40 40 820 780"}
       fill="none"
       aria-hidden
       preserveAspectRatio="xMidYMid meet"
@@ -99,123 +168,117 @@ export function NarrativeWorld() {
       </defs>
 
       <g className="nv-camera">
-        <g className="nv-atmosphere" opacity="0.9">
-          <circle cx="420" cy="420" r="280" fill="rgba(81,60,250,0.035)" />
-          <circle cx="620" cy="320" r="160" fill="rgba(81,60,250,0.02)" />
+        {/* Atmósfera abierta — sin círculo contenedor */}
+        <g className="nv-atmosphere" opacity="0.5">
+          <ellipse
+            cx="520"
+            cy="400"
+            rx="340"
+            ry="220"
+            fill="rgba(81,60,250,0.04)"
+            transform="rotate(-18 520 400)"
+          />
+          <ellipse
+            cx="380"
+            cy="520"
+            rx="200"
+            ry="140"
+            fill="rgba(81,60,250,0.025)"
+            transform="rotate(12 380 520)"
+          />
+          {/* Marcas editoriales sueltas */}
+          <g stroke="rgba(255,255,255,0.07)" strokeWidth="0.6">
+            <line x1="96" y1="120" x2="112" y2="120" />
+            <line x1="96" y1="120" x2="96" y2="136" />
+            <line x1="820" y1="160" x2="804" y2="160" />
+            <line x1="820" y1="160" x2="820" y2="176" />
+            <line x1="780" y1="700" x2="796" y2="700" />
+            <line x1="796" y1="700" x2="796" y2="684" />
+          </g>
         </g>
 
-        <g className="nv-need">
-          <line x1="88" y1="96" x2="88" y2="248" stroke="rgba(81,60,250,0.55)" strokeWidth="1" />
+        <g className="nv-need" opacity="0">
           <text
             x="108"
-            y="116"
-            fill="rgba(81,60,250,0.95)"
-            fontSize="11"
+            y="128"
+            fill="rgba(81,60,250,0.8)"
+            fontSize="10"
             fontFamily={MONO}
-            letterSpacing="2.6"
+            letterSpacing="2.4"
           >
-            NECESIDAD / 01
-          </text>
-          <text x="108" y="172" fill="rgba(255,255,255,0.96)" fontSize="32" fontFamily={FONT}>
-            La operación creció.
-          </text>
-          <text x="108" y="210" fill="rgba(255,255,255,0.4)" fontSize="32" fontFamily={FONT}>
-            Las herramientas no.
-          </text>
-          <text x="108" y="250" fill="rgba(255,255,255,0.32)" fontSize="14" fontFamily={FONT}>
-            Cuatro síntomas. Todavía sin sistema.
+            OBSERVAR
           </text>
         </g>
 
-        <g className="nv-annos">
-          <g opacity="0.7">
+        {/* Evidencia de campo — legible, anclada al trazo */}
+        <g className="nv-annos" opacity="0">
+          <g>
             <path
-              d="M 286 168 L 286 180 L 298 180"
-              stroke="rgba(255,255,255,0.28)"
-              strokeWidth="0.8"
+              d="M 300 150 L 300 168 L 318 168"
+              stroke="rgba(255,255,255,0.35)"
+              strokeWidth="0.9"
             />
-            <text x="304" y="183" fill="rgba(255,255,255,0.38)" fontSize="11" fontFamily={MONO}>
-              [excel + wsp]
+            <text x="326" y="172" fill="rgba(255,255,255,0.5)" fontSize="12" fontFamily={MONO}>
+              excel + wsp
             </text>
           </g>
-          <g opacity="0.62">
+          <g>
             <path
-              d="M 760 318 L 760 330 L 772 330"
-              stroke="rgba(255,255,255,0.24)"
-              strokeWidth="0.8"
+              d="M 700 290 L 700 308 L 682 308"
+              stroke="rgba(255,255,255,0.3)"
+              strokeWidth="0.9"
             />
-            <text x="778" y="333" fill="rgba(255,255,255,0.32)" fontSize="11" fontFamily={MONO}>
+            <text x="676" y="312" textAnchor="end" fill="rgba(255,255,255,0.45)" fontSize="12" fontFamily={MONO}>
               sin dueño
             </text>
           </g>
-          <g opacity="0.55">
+          <g>
             <path
-              d="M 88 520 L 88 532 L 100 532"
-              stroke="rgba(255,255,255,0.22)"
-              strokeWidth="0.8"
+              d="M 96 500 L 96 518 L 114 518"
+              stroke="rgba(255,255,255,0.28)"
+              strokeWidth="0.9"
             />
-            <text x="106" y="535" fill="rgba(255,255,255,0.3)" fontSize="11" fontFamily={MONO}>
+            <text x="122" y="522" fill="rgba(255,255,255,0.42)" fontSize="12" fontFamily={MONO}>
               ¿quién actualiza?
             </text>
           </g>
-          <g opacity="0.5">
-            <text x="520" y="720" fill="rgba(255,255,255,0.26)" fontSize="11" fontFamily={MONO}>
-              v3 / v7 / “la buena”
-            </text>
-          </g>
-          <g opacity="0.45">
-            <text x="760" y="620" fill="rgba(255,255,255,0.22)" fontSize="10" fontFamily={MONO}>
-              hallazgo · offline
-            </text>
-          </g>
+          <text x="560" y="710" fill="rgba(255,255,255,0.36)" fontSize="12" fontFamily={MONO}>
+            v3 / v7 / “la buena”
+          </text>
         </g>
 
-        <g className="nv-deadends" opacity="0.85">
+        <g className="nv-deadends" opacity="0">
           <path
-            d={`M ${THINK[1].x} ${THINK[1].y} C 250 350, 290 330, 330 318`}
+            d={`M ${THINK[1].x} ${THINK[1].y} C 260 355, 300 335, 342 322`}
+            stroke="rgba(255,255,255,0.28)"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+            strokeDasharray="3 6"
+          />
+          <path
+            d={`M ${THINK[2].x} ${THINK[2].y} C 530 340, 575 380, 610 430`}
             stroke="rgba(255,255,255,0.22)"
-            strokeWidth="1"
+            strokeWidth="1.1"
             strokeLinecap="round"
-            strokeDasharray="2.5 5"
+            strokeDasharray="3 6"
           />
           <path
-            d={`M ${THINK[2].x} ${THINK[2].y} C 520 330, 560 370, 590 410`}
-            stroke="rgba(255,255,255,0.18)"
-            strokeWidth="1"
+            d={`M ${THINK[3].x} ${THINK[3].y} C 660 530, 600 575, 545 600`}
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="1.05"
             strokeLinecap="round"
-            strokeDasharray="2.5 5"
+            strokeDasharray="3 6"
           />
-          <path
-            d={`M ${THINK[3].x} ${THINK[3].y} C 660 520, 600 560, 540 585`}
-            stroke="rgba(255,255,255,0.16)"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeDasharray="2.5 5"
-          />
-          <path
-            d={`M ${THINK[1].x} ${THINK[1].y} C 180 450, 150 490, 130 520`}
-            stroke="rgba(255,255,255,0.14)"
-            strokeWidth="0.9"
-            strokeLinecap="round"
-            strokeDasharray="2 6"
-          />
-          <circle cx="330" cy="318" r="2" fill="rgba(255,255,255,0.28)" />
-          <circle cx="590" cy="410" r="2" fill="rgba(255,255,255,0.22)" />
-          <circle cx="540" cy="585" r="2" fill="rgba(255,255,255,0.2)" />
-          <circle cx="130" cy="520" r="1.8" fill="rgba(255,255,255,0.18)" />
-          <text x="338" y="314" fill="rgba(255,255,255,0.22)" fontSize="9" fontFamily={MONO}>
-            ?
-          </text>
-          <text x="598" y="408" fill="rgba(255,255,255,0.18)" fontSize="9" fontFamily={MONO}>
-            ?
-          </text>
+          <circle cx="342" cy="322" r="2.4" fill="rgba(255,255,255,0.35)" />
+          <circle cx="610" cy="430" r="2.4" fill="rgba(255,255,255,0.28)" />
+          <circle cx="545" cy="600" r="2.4" fill="rgba(255,255,255,0.25)" />
         </g>
 
         <path
           className="nv-think-glow"
           d={THINK_PATH}
-          stroke="rgba(81,60,250,0.45)"
-          strokeWidth="6"
+          stroke="rgba(81,60,250,0.55)"
+          strokeWidth="8"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -228,88 +291,121 @@ export function NarrativeWorld() {
           className="nv-think"
           d={THINK_PATH}
           stroke="url(#nv-think-grad)"
-          strokeWidth="1.85"
+          strokeWidth="2.15"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
+          strokeDasharray="2400"
+          strokeDashoffset="2400"
         />
-        <circle className="nv-pulse" r="4.8" fill="#513CFA" cx={THINK[0].x} cy={THINK[0].y} />
         <circle
-          className="nv-pulse-ring"
-          r="11"
+          className="nv-pulse"
+          r="5.2"
+          fill="#513CFA"
           cx={THINK[0].x}
           cy={THINK[0].y}
-          stroke="rgba(81,60,250,0.4)"
-          strokeWidth="0.85"
+          opacity="0.55"
+        />
+        <circle
+          className="nv-pulse-ring"
+          r="13"
+          cx={THINK[0].x}
+          cy={THINK[0].y}
+          stroke="rgba(81,60,250,0.45)"
+          strokeWidth="1"
           fill="none"
           opacity="0"
         />
 
         {FRAGS.map((f, idx) => {
           const pt = THINK[f.i];
-          const labelX = f.side === "left" ? pt.x - 14 : pt.x + 14;
-          const anchor = f.side === "left" ? "end" : "start";
-          const tagX = f.side === "left" ? pt.x - 14 : pt.x + 14;
+          const isLeft = f.side === "left";
+          const labelX = isLeft ? pt.x - 18 : pt.x + 18;
+          const anchor = isLeft ? "end" : "start";
+          const tickX2 = isLeft ? pt.x - 14 : pt.x + 14;
           return (
             <g key={f.chaos} className={`nv-frag nv-frag-${idx}`}>
               <circle
                 className="nv-frag-halo"
                 cx={pt.x}
                 cy={pt.y}
-                r="13"
-                stroke="rgba(81,60,250,0.28)"
-                strokeWidth="0.75"
-                fill="rgba(81,60,250,0.04)"
-                opacity="0.2"
+                r="16"
+                stroke="rgba(81,60,250,0.35)"
+                strokeWidth="0.85"
+                fill="rgba(81,60,250,0.06)"
+                opacity="0"
               />
               <circle
                 className="nv-frag-dot"
                 cx={pt.x}
                 cy={pt.y}
-                r="3.6"
+                r="4.2"
                 fill="#513CFA"
-                fillOpacity="0.85"
+                fillOpacity="0"
               />
-              <text
-                className="nv-frag-tag"
-                x={tagX}
-                y={pt.y - 28}
-                textAnchor={anchor}
-                fill="rgba(81,60,250,0.7)"
-                fontSize="10"
-                fontFamily={MONO}
-              >
-                {f.tag}
-              </text>
+              <circle
+                cx={pt.x}
+                cy={pt.y}
+                r="1.6"
+                fill="#fff"
+                fillOpacity="0.55"
+                className="nv-frag-core"
+                opacity="0"
+              />
               <line
                 className="nv-frag-tick"
                 x1={pt.x}
-                y1={pt.y - 6}
-                x2={f.side === "left" ? pt.x - 10 : pt.x + 10}
-                y2={pt.y - 18}
-                stroke="rgba(255,255,255,0.18)"
-                strokeWidth="0.7"
-                opacity="0.4"
+                y1={pt.y}
+                x2={tickX2}
+                y2={pt.y - 22}
+                stroke="rgba(255,255,255,0.22)"
+                strokeWidth="0.85"
+                opacity="0"
               />
+              <text
+                className="nv-frag-tag"
+                x={labelX}
+                y={pt.y - 42}
+                textAnchor={anchor}
+                fill="rgba(81,60,250,0.85)"
+                fontSize="11"
+                fontFamily={MONO}
+                letterSpacing="1.6"
+                opacity="0"
+              >
+                {f.num}
+              </text>
               <text
                 className="nv-frag-chaos"
                 x={labelX}
-                y={pt.y - 18}
+                y={pt.y - 22}
                 textAnchor={anchor}
-                fill="rgba(255,255,255,0.72)"
-                fontSize="15.5"
+                fill="rgba(255,255,255,0.94)"
+                fontSize="18"
                 fontFamily={FONT}
-                opacity="0.35"
+                opacity="0"
               >
                 {f.chaos}
               </text>
-              {f.axis && f.num && f.detail ? (
+              <text
+                className="nv-frag-evidence"
+                x={labelX}
+                y={pt.y - 4}
+                textAnchor={anchor}
+                fill="rgba(255,255,255,0.38)"
+                fontSize="12"
+                fontFamily={MONO}
+                opacity="0"
+              >
+                {f.evidence}
+              </text>
+              {f.axis && f.detail ? (
                 <g className="nv-frag-axis" opacity="0">
                   <text
                     x={pt.x}
-                    y={pt.y - 52}
+                    y={pt.y - 56}
                     textAnchor="middle"
-                    fill="rgba(81,60,250,0.9)"
+                    fill="rgba(81,60,250,0.95)"
                     fontSize="11"
                     fontFamily={MONO}
                     letterSpacing="2.2"
@@ -318,9 +414,9 @@ export function NarrativeWorld() {
                   </text>
                   <text
                     x={pt.x}
-                    y={pt.y - 18}
+                    y={pt.y - 22}
                     textAnchor="middle"
-                    fill="rgba(255,255,255,0.95)"
+                    fill="rgba(255,255,255,0.96)"
                     fontSize="20"
                     fontFamily={FONT}
                     letterSpacing="1.6"
@@ -328,18 +424,18 @@ export function NarrativeWorld() {
                     {f.axis}
                   </text>
                   <line
-                    x1={pt.x - 56}
-                    y1={pt.y + 4}
-                    x2={pt.x + 56}
-                    y2={pt.y + 4}
-                    stroke="rgba(81,60,250,0.45)"
+                    x1={pt.x - 52}
+                    y1={pt.y - 8}
+                    x2={pt.x + 52}
+                    y2={pt.y - 8}
+                    stroke="rgba(81,60,250,0.5)"
                     strokeWidth="0.9"
                   />
                   <text
                     x={pt.x}
-                    y={pt.y + 28}
+                    y={pt.y + 36}
                     textAnchor="middle"
-                    fill="rgba(255,255,255,0.28)"
+                    fill="rgba(255,255,255,0.4)"
                     fontSize="12"
                     fontFamily={FONT}
                   >
@@ -347,9 +443,9 @@ export function NarrativeWorld() {
                   </text>
                   <text
                     x={pt.x}
-                    y={pt.y + 50}
+                    y={pt.y + 58}
                     textAnchor="middle"
-                    fill="rgba(255,255,255,0.55)"
+                    fill="rgba(255,255,255,0.7)"
                     fontSize="13"
                     fontFamily={FONT}
                   >
@@ -364,31 +460,87 @@ export function NarrativeWorld() {
         <g className="nv-axis-stage" opacity="0">
           <text
             x="450"
-            y="250"
+            y="240"
             textAnchor="middle"
-            fill="rgba(255,255,255,0.28)"
-            fontSize="11"
+            fill="rgba(255,255,255,0.72)"
+            fontSize="13"
             fontFamily={MONO}
-            letterSpacing="2.8"
+            letterSpacing="3.2"
           >
             CRITERIOS
           </text>
           <line
-            x1="140"
-            y1="280"
-            x2="760"
-            y2="280"
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth="0.6"
+            x1="210"
+            y1="262"
+            x2="690"
+            y2="262"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="0.75"
           />
           <path
             className="nv-draw nv-axis-spine"
-            d="M 160 420 C 280 390, 360 390, 450 420 S 620 450, 740 420"
+            d={AXIS_SPINE}
             stroke="#513CFA"
-            strokeWidth="1.35"
+            strokeWidth="1.55"
             strokeLinecap="round"
             fill="none"
           />
+          {AXIS_LAYOUT.map((a) => (
+            <g key={a.num} className="nv-axis-node">
+              <circle cx={a.x} cy={a.y} r="5" fill="#513CFA" />
+              <circle cx={a.x} cy={a.y} r="1.8" fill="#fff" fillOpacity="0.7" />
+              <text
+                x={a.x}
+                y={a.y - 56}
+                textAnchor="middle"
+                fill="rgba(81,60,250,0.95)"
+                fontSize="11"
+                fontFamily={MONO}
+                letterSpacing="2.2"
+              >
+                {a.num}
+              </text>
+              <text
+                x={a.x}
+                y={a.y - 22}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.96)"
+                fontSize="20"
+                fontFamily={FONT}
+                letterSpacing="1.6"
+              >
+                {a.axis}
+              </text>
+              <line
+                x1={a.x - 52}
+                y1={a.y - 8}
+                x2={a.x + 52}
+                y2={a.y - 8}
+                stroke="rgba(81,60,250,0.5)"
+                strokeWidth="0.9"
+              />
+              <text
+                x={a.x}
+                y={a.y + 36}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.4)"
+                fontSize="12"
+                fontFamily={FONT}
+              >
+                {a.chaos}
+              </text>
+              <text
+                x={a.x}
+                y={a.y + 58}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.7)"
+                fontSize="13"
+                fontFamily={FONT}
+              >
+                {a.detail}
+              </text>
+            </g>
+          ))}
         </g>
 
         {/* Arquitectura abierta: tipografía libre + hub + satélites */}
@@ -406,44 +558,50 @@ export function NarrativeWorld() {
           <text x="120" y="214" fill="rgba(255,255,255,0.9)" fontSize="22" fontFamily={FONT}>
             La operación, armada.
           </text>
-          <text x="120" y="240" fill="rgba(255,255,255,0.34)" fontSize="14" fontFamily={FONT}>
+          <text x="120" y="240" fill="rgba(255,255,255,0.55)" fontSize="14" fontFamily={FONT}>
             Piezas que se hablan. Un solo criterio.
           </text>
         </g>
 
+        {/*
+          Enlaces enteros (sin stroke-dash): salen y llegan a los puertos.
+        */}
         <g className="nv-sys-links" opacity="0">
           <path
-            className="nv-draw"
-            d="M 268 360 C 310 340, 340 335, 360 360"
-            stroke="rgba(81,60,250,0.5)"
+            className="nv-link-side"
+            d={linkCurve(SYS_PORTS.clientesOut, SYS_PORTS.pedidosInL, 28)}
+            stroke="rgba(81,60,250,0.7)"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            className="nv-link-side"
+            d={linkCurve(SYS_PORTS.pedidosInR, SYS_PORTS.pagosIn, -28)}
+            stroke="rgba(255,255,255,0.38)"
             strokeWidth="1.25"
+            strokeLinecap="round"
             fill="none"
           />
           <path
-            className="nv-draw"
-            d="M 600 360 C 640 335, 690 330, 740 358"
-            stroke="rgba(255,255,255,0.24)"
-            strokeWidth="1.1"
+            className="nv-link-bottom"
+            d={linkCurve(SYS_PORTS.pedidosOutBL, SYS_PORTS.operacionIn, -36)}
+            stroke="rgba(255,255,255,0.34)"
+            strokeWidth="1.25"
+            strokeLinecap="round"
             fill="none"
           />
           <path
-            className="nv-draw"
-            d="M 420 490 C 360 530, 300 560, 250 590"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="1"
+            className="nv-link-bottom"
+            d={linkCurve(SYS_PORTS.pedidosOutBR, SYS_PORTS.reportesIn, 36)}
+            stroke="rgba(255,255,255,0.34)"
+            strokeWidth="1.25"
+            strokeLinecap="round"
             fill="none"
           />
-          <path
-            className="nv-draw"
-            d="M 520 490 C 560 530, 600 560, 650 590"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="1"
-            fill="none"
-          />
-          <circle cx="310" cy="348" r="2.5" fill="#513CFA" fillOpacity="0.85" />
-          <circle cx="670" cy="342" r="2.3" fill="rgba(255,255,255,0.45)" />
-          <circle cx="330" cy="550" r="2.2" fill="rgba(255,255,255,0.32)" />
-          <circle cx="590" cy="550" r="2.2" fill="rgba(255,255,255,0.32)" />
+          {Object.values(SYS_PORTS).map((p) => (
+            <circle key={`${p.x}-${p.y}`} cx={p.x} cy={p.y} r="2.8" fill="#513CFA" fillOpacity="0.9" />
+          ))}
         </g>
 
         <g className="nv-sys nv-sys-clientes" opacity="0">

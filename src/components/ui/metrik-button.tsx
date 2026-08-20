@@ -11,6 +11,7 @@ type BaseProps = {
   type?: "button" | "submit" | "reset";
   onClick?: React.MouseEventHandler<HTMLElement>;
   ariaLabel?: string;
+  disabled?: boolean;
 };
 
 function sharedFocus(
@@ -29,6 +30,7 @@ export function PrimaryButton({
   type = "button",
   onClick,
   ariaLabel,
+  disabled,
 }: BaseProps) {
   const classes = sharedFocus(
     cn(
@@ -46,7 +48,13 @@ export function PrimaryButton({
   }
 
   return (
-    <button type={type} className={classes} onClick={onClick} aria-label={ariaLabel}>
+    <button
+      type={type}
+      className={classes}
+      onClick={onClick}
+      aria-label={ariaLabel}
+      disabled={disabled}
+    >
       {children}
     </button>
   );
