@@ -108,20 +108,20 @@ function prepThinkLine(line: SVGPathElement) {
   return len;
 }
 
-/** Copia izquierda — crossfade suave. */
+/** Copia izquierda — sale completa antes de que entre la siguiente. */
 function copySwap(
   tl: gsap.core.Timeline,
   leave: string,
   enter: string | null,
   at: number
 ) {
-  tl.to(leave, { autoAlpha: 0, duration: 0.06, ease: "none" }, at);
+  tl.to(leave, { autoAlpha: 0, y: -10, duration: 0.05, ease: "none" }, at);
   if (enter) {
     tl.fromTo(
       enter,
-      { autoAlpha: 0, y: 12 },
-      { autoAlpha: 1, y: 0, duration: 0.08, ease: "none" },
-      at + 0.03
+      { autoAlpha: 0, y: 16 },
+      { autoAlpha: 1, y: 0, duration: 0.07, ease: "none" },
+      at + 0.05
     );
   }
 }
@@ -167,9 +167,11 @@ export function NarrativeExperience() {
       gsap.set(".nv-frag", { x: 0, y: 0, opacity: 1 });
       gsap.set(".nv-sys", { opacity: 0, x: 0, y: 0, scale: 1 });
       gsap.set(".nv-axis-stage", { opacity: 0 });
+      gsap.set(".nv-sys-head", { opacity: 0 });
       gsap.set(".nv-sys-links", { opacity: 0 });
       gsap.set(".nv-wire", { opacity: 0 });
-      gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "450 278" });
+      gsap.set(".nv-hot-frame", { attr: { height: 220, y: 270 } });
+      gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "470 380" });
       gsap.set(".nv-product", {
         autoAlpha: 0,
         scale: 0.92,
@@ -319,52 +321,39 @@ export function NarrativeExperience() {
       tl.to(".nv-frag", { opacity: 0, duration: 0.08 }, 0.46);
       tl.to(".nv-axis-stage", { opacity: 0, duration: 0.08 }, 0.46);
 
-      /* ——— 0.54–0.66 ESTRUCTURAR ——— */
-      tl.fromTo(".nv-sys-clientes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.54);
-      tl.fromTo(".nv-sys-pedidos", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.57);
-      tl.fromTo(".nv-sys-pagos", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.6);
-      tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.63);
-      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.65);
+      /* ——— 0.54–0.66 ESTRUCTURAR: arquitectura abierta ——— */
+      tl.to(".nv-sys-head", { opacity: 1, duration: 0.08 }, 0.54);
+      tl.fromTo(".nv-sys-pedidos", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.08 }, 0.55);
+      tl.fromTo(".nv-sys-clientes", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.07 }, 0.58);
+      tl.fromTo(".nv-sys-pagos", { opacity: 0, x: 16 }, { opacity: 1, x: 0, duration: 0.07 }, 0.6);
+      tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.625);
+      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.07 }, 0.645);
 
-      tl.to(".nv-sys-links", { opacity: 1, duration: 0.05 }, 0.6);
-      tl.to(".nv-sys-links .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.1, stagger: 0.02 }, 0.6);
+      tl.to(".nv-sys-links", { opacity: 1, duration: 0.06 }, 0.59);
+      tl.to(".nv-sys-links .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.1, stagger: 0.02 }, 0.59);
 
-      /* ——— 0.66–0.82 CONSTRUIR: zoom + hold en Pedidos ——— */
+      /* ——— 0.66–0.82 CONSTRUIR: satélites se van, hub crece (sin zoom que recorta) ——— */
       copySwap(tl, ".nv-beat-structure", ".nv-beat-build", 0.66);
 
-      tl.to(".nv-sys-clientes, .nv-sys-pagos, .nv-sys-operacion, .nv-sys-reportes", {
-        opacity: 0.18,
-        duration: 0.1,
-      }, 0.68);
-      tl.to(".nv-sys-links", { opacity: 0.15, duration: 0.1 }, 0.68);
+      tl.to(".nv-sys-head", { opacity: 0, duration: 0.08 }, 0.68);
+      tl.to(".nv-sys-links", { opacity: 0, duration: 0.08 }, 0.68);
+      tl.to(".nv-sys-clientes", { opacity: 0, x: -40, duration: 0.1 }, 0.68);
+      tl.to(".nv-sys-pagos", { opacity: 0, x: 40, duration: 0.1 }, 0.68);
+      tl.to(".nv-sys-operacion", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
+      tl.to(".nv-sys-reportes", { opacity: 0, y: 36, duration: 0.1 }, 0.69);
 
-      tl.to(
-        ".nv-camera",
-        {
-          scale: isMobile ? 1.5 : 1.75,
-          x: isMobile ? -16 : -36,
-          y: isMobile ? 36 : 64,
-          duration: 0.12,
-          svgOrigin: "450 278",
-        },
-        0.7
-      );
-
-      tl.to(".nv-hot-frame", { attr: { height: 200, y: 250 }, duration: 0.1 }, 0.72);
-      tl.to(".nv-hot-label", { attr: { y: 278 }, duration: 0.08 }, 0.72);
-      tl.to(".nv-wire", { opacity: 1, duration: 0.08 }, 0.74);
-      // Hold: Pedidos abierto, sin apurarse al producto
+      // El módulo crece en el espacio abierto — no hay placa que lo corte
+      tl.to(".nv-hot-frame", { attr: { height: 290, width: 300, x: 320 }, duration: 0.12 }, 0.7);
+      tl.to(".nv-hot-chrome", { attr: { width: 300, x: 320 }, duration: 0.12 }, 0.7);
+      tl.to(".nv-wire", { opacity: 1, duration: 0.1 }, 0.74);
+      tl.to(".nv-sys-pedidos", { x: isMobile ? 0 : 20, y: isMobile ? -10 : -24, duration: 0.12 }, 0.7);
+      // Hold
       tl.to(".nv-wire", { opacity: 1, duration: 0.06 }, 0.8);
 
-      /* ——— 0.82–0.93 PRODUCTO: UI completo con hold ——— */
+      /* ——— 0.82–0.92 PRODUCTO ——— */
       copySwap(tl, ".nv-beat-build", ".nv-beat-product", 0.82);
 
-      tl.to(".nv-sys-clientes, .nv-sys-pagos, .nv-sys-operacion, .nv-sys-reportes", {
-        opacity: 0,
-        duration: 0.06,
-      }, 0.82);
-      tl.to(".nv-sys-links", { opacity: 0, duration: 0.05 }, 0.82);
-      tl.to(".nv-sys-pedidos", { opacity: 0, duration: 0.07 }, 0.82);
+      tl.to(".nv-sys-pedidos", { opacity: 0, duration: 0.08 }, 0.82);
       tl.to(".nv-camera", { opacity: 0, duration: 0.08 }, 0.82);
 
       tl.fromTo(
@@ -484,8 +473,8 @@ export function NarrativeExperience() {
             </div>
           </div>
 
-          <div className="relative z-10 min-h-[44vh] flex-1 overflow-hidden lg:min-h-0">
-            <div className="absolute inset-0">
+          <div className="relative z-10 min-h-[44vh] flex-1 lg:min-h-0">
+            <div className="absolute inset-0 overflow-visible">
               <NarrativeWorld />
               <NarrativeProduct />
             </div>

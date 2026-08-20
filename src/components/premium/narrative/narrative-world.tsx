@@ -3,11 +3,11 @@ const MONO = "var(--font-mono), ui-monospace, monospace";
 
 /** Waypoints del pensamiento — curva suave, sin ángulos. */
 const THINK = [
-  { x: 110, y: 268 }, // nace bajo NECESIDAD
-  { x: 230, y: 400 }, // Información dispersa
-  { x: 470, y: 310 }, // Procesos manuales
-  { x: 700, y: 470 }, // Seguimiento difícil
-  { x: 380, y: 650 }, // Trabajo duplicado
+  { x: 110, y: 268 },
+  { x: 230, y: 400 },
+  { x: 470, y: 310 },
+  { x: 700, y: 470 },
+  { x: 380, y: 650 },
 ] as const;
 
 const FRAGS = [
@@ -72,11 +72,12 @@ const THINK_PATH = curveThrough(THINK);
 
 /**
  * Un solo mundo SVG. Los mismos nodos mutan de caos → ejes → sistema → módulo.
+ * Sistema: arquitectura abierta (sin placa contenedora) — hub + satélites.
  */
 export function NarrativeWorld() {
   return (
     <svg
-      className="nv-world pointer-events-none h-full w-full"
+      className="nv-world pointer-events-none h-full w-full overflow-visible"
       viewBox="40 40 820 780"
       fill="none"
       aria-hidden
@@ -98,13 +99,11 @@ export function NarrativeWorld() {
       </defs>
 
       <g className="nv-camera">
-        {/* Atmósfera suave — llena el vacío sin competir */}
         <g className="nv-atmosphere" opacity="0.9">
           <circle cx="420" cy="420" r="280" fill="rgba(81,60,250,0.035)" />
           <circle cx="620" cy="320" r="160" fill="rgba(81,60,250,0.02)" />
         </g>
 
-        {/* NECESIDAD — portada con tensión editorial */}
         <g className="nv-need">
           <line x1="88" y1="96" x2="88" y2="248" stroke="rgba(81,60,250,0.55)" strokeWidth="1" />
           <text
@@ -128,7 +127,6 @@ export function NarrativeWorld() {
           </text>
         </g>
 
-        {/* Notas de campo — evidencia pegada al trazo */}
         <g className="nv-annos">
           <g opacity="0.7">
             <path
@@ -172,7 +170,6 @@ export function NarrativeWorld() {
           </g>
         </g>
 
-        {/* Ramales incompletos — salen del criterio, no llegan */}
         <g className="nv-deadends" opacity="0.85">
           <path
             d={`M ${THINK[1].x} ${THINK[1].y} C 250 350, 290 330, 330 318`}
@@ -214,7 +211,6 @@ export function NarrativeWorld() {
           </text>
         </g>
 
-        {/* Glow bajo el trazo */}
         <path
           className="nv-think-glow"
           d={THINK_PATH}
@@ -227,7 +223,6 @@ export function NarrativeWorld() {
           opacity="0"
         />
 
-        {/* Una sola línea de pensamiento */}
         <path
           id="nv-line"
           className="nv-think"
@@ -250,7 +245,6 @@ export function NarrativeWorld() {
           opacity="0"
         />
 
-        {/* Fragmentos → criterios */}
         {FRAGS.map((f, idx) => {
           const pt = THINK[f.i];
           const labelX = f.side === "left" ? pt.x - 14 : pt.x + 14;
@@ -367,7 +361,6 @@ export function NarrativeWorld() {
           );
         })}
 
-        {/* Estructura de criterios — spine + marco editorial */}
         <g className="nv-axis-stage" opacity="0">
           <text
             x="450"
@@ -398,188 +391,283 @@ export function NarrativeWorld() {
           />
         </g>
 
-        {/* Sistema */}
-        <g className="nv-sys nv-sys-clientes" opacity="0">
-          <rect
-            x="70"
-            y="250"
-            width="180"
-            height="56"
-            stroke="rgba(255,255,255,0.22)"
-            strokeWidth="0.9"
-          />
+        {/* Arquitectura abierta: tipografía libre + hub + satélites */}
+        <g className="nv-sys-head" opacity="0">
           <text
-            x="160"
-            y="285"
-            textAnchor="middle"
-            fill="rgba(255,255,255,0.85)"
-            fontSize="15"
-            fontFamily={FONT}
-            letterSpacing="1.2"
+            x="120"
+            y="178"
+            fill="rgba(81,60,250,0.95)"
+            fontSize="11"
+            fontFamily={MONO}
+            letterSpacing="2.6"
           >
-            CLIENTES
+            SISTEMA / 03
           </text>
-        </g>
-
-        <g className="nv-sys nv-sys-pedidos" opacity="0">
-          <rect
-            className="nv-hot-frame"
-            x="350"
-            y="250"
-            width="200"
-            height="56"
-            stroke="rgba(81,60,250,0.85)"
-            strokeWidth="1.15"
-          />
-          <text
-            className="nv-hot-label"
-            x="450"
-            y="285"
-            textAnchor="middle"
-            fill="#fff"
-            fontSize="15"
-            fontFamily={FONT}
-            letterSpacing="1.2"
-          >
-            PEDIDOS
+          <text x="120" y="214" fill="rgba(255,255,255,0.9)" fontSize="22" fontFamily={FONT}>
+            La operación, armada.
           </text>
-          <g className="nv-wire" opacity="0">
-            <rect
-              x="360"
-              y="320"
-              width="180"
-              height="120"
-              stroke="rgba(255,255,255,0.16)"
-              strokeWidth="0.75"
-            />
-            <line
-              x1="360"
-              y1="348"
-              x2="540"
-              y2="348"
-              stroke="rgba(255,255,255,0.1)"
-              strokeWidth="0.6"
-            />
-            <text x="372" y="372" fill="rgba(81,60,250,0.9)" fontSize="10" fontFamily={MONO}>
-              #1842
-            </text>
-            <text x="372" y="396" fill="rgba(255,255,255,0.55)" fontSize="13" fontFamily={FONT}>
-              En curso
-            </text>
-            <line
-              x1="372"
-              y1="412"
-              x2="500"
-              y2="412"
-              stroke="rgba(255,255,255,0.08)"
-              strokeWidth="0.5"
-            />
-            <line
-              x1="372"
-              y1="428"
-              x2="480"
-              y2="428"
-              stroke="rgba(255,255,255,0.06)"
-              strokeWidth="0.5"
-            />
-          </g>
-        </g>
-
-        <g className="nv-sys nv-sys-pagos" opacity="0">
-          <rect
-            x="650"
-            y="250"
-            width="180"
-            height="56"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="0.9"
-          />
-          <text
-            x="740"
-            y="285"
-            textAnchor="middle"
-            fill="rgba(255,255,255,0.8)"
-            fontSize="15"
-            fontFamily={FONT}
-            letterSpacing="1.2"
-          >
-            PAGOS
-          </text>
-        </g>
-
-        <g className="nv-sys nv-sys-operacion" opacity="0">
-          <rect
-            x="300"
-            y="430"
-            width="300"
-            height="56"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="0.9"
-          />
-          <text
-            x="450"
-            y="465"
-            textAnchor="middle"
-            fill="rgba(255,255,255,0.8)"
-            fontSize="15"
-            fontFamily={FONT}
-            letterSpacing="1.2"
-          >
-            OPERACIÓN
-          </text>
-        </g>
-
-        <g className="nv-sys nv-sys-reportes" opacity="0">
-          <rect
-            x="300"
-            y="560"
-            width="300"
-            height="56"
-            stroke="rgba(255,255,255,0.18)"
-            strokeWidth="0.9"
-          />
-          <text
-            x="450"
-            y="595"
-            textAnchor="middle"
-            fill="rgba(255,255,255,0.75)"
-            fontSize="15"
-            fontFamily={FONT}
-            letterSpacing="1.2"
-          >
-            REPORTES
+          <text x="120" y="240" fill="rgba(255,255,255,0.34)" fontSize="14" fontFamily={FONT}>
+            Piezas que se hablan. Un solo criterio.
           </text>
         </g>
 
         <g className="nv-sys-links" opacity="0">
           <path
             className="nv-draw"
-            d="M 250 278 C 290 278, 310 278, 350 278"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="0.75"
-            fill="none"
-          />
-          <path
-            className="nv-draw"
-            d="M 550 278 C 590 278, 610 278, 650 278"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="0.75"
-            fill="none"
-          />
-          <path
-            className="nv-draw"
-            d="M 450 306 C 450 350, 450 390, 450 430"
+            d="M 268 360 C 310 340, 340 335, 360 360"
             stroke="rgba(81,60,250,0.5)"
-            strokeWidth="0.9"
+            strokeWidth="1.25"
             fill="none"
           />
           <path
             className="nv-draw"
-            d="M 450 486 C 450 520, 450 540, 450 560"
-            stroke="rgba(255,255,255,0.18)"
-            strokeWidth="0.75"
+            d="M 600 360 C 640 335, 690 330, 740 358"
+            stroke="rgba(255,255,255,0.24)"
+            strokeWidth="1.1"
             fill="none"
           />
+          <path
+            className="nv-draw"
+            d="M 420 490 C 360 530, 300 560, 250 590"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="1"
+            fill="none"
+          />
+          <path
+            className="nv-draw"
+            d="M 520 490 C 560 530, 600 560, 650 590"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="1"
+            fill="none"
+          />
+          <circle cx="310" cy="348" r="2.5" fill="#513CFA" fillOpacity="0.85" />
+          <circle cx="670" cy="342" r="2.3" fill="rgba(255,255,255,0.45)" />
+          <circle cx="330" cy="550" r="2.2" fill="rgba(255,255,255,0.32)" />
+          <circle cx="590" cy="550" r="2.2" fill="rgba(255,255,255,0.32)" />
+        </g>
+
+        <g className="nv-sys nv-sys-clientes" opacity="0">
+          <rect
+            x="100"
+            y="300"
+            width="168"
+            height="120"
+            rx="10"
+            fill="rgba(255,255,255,0.04)"
+            stroke="rgba(255,255,255,0.16)"
+            strokeWidth="0.9"
+          />
+          <text x="118" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
+            01
+          </text>
+          <text x="118" y="352" fill="rgba(255,255,255,0.92)" fontSize="15" fontFamily={FONT}>
+            Clientes
+          </text>
+          <line
+            x1="118"
+            y1="366"
+            x2="248"
+            y2="366"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="0.6"
+          />
+          <text x="118" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
+            Norte · SA
+          </text>
+          <text x="118" y="406" fill="rgba(255,255,255,0.28)" fontSize="11" fontFamily={FONT}>
+            Rivadavia
+          </text>
+        </g>
+
+        {/* Hub Pedidos — ya se lee como producto */}
+        <g className="nv-sys nv-sys-pedidos" opacity="0">
+          <rect
+            className="nv-hot-frame"
+            x="340"
+            y="270"
+            width="260"
+            height="220"
+            rx="12"
+            fill="rgba(10,10,14,0.94)"
+            stroke="rgba(81,60,250,0.8)"
+            strokeWidth="1.4"
+          />
+          <rect
+            className="nv-hot-chrome"
+            x="340"
+            y="270"
+            width="260"
+            height="44"
+            rx="12"
+            fill="rgba(81,60,250,0.14)"
+          />
+          <rect x="340" y="302" width="260" height="12" fill="rgba(81,60,250,0.14)" />
+          <circle cx="358" cy="292" r="3.2" fill="#513CFA" />
+          <text className="nv-hot-label" x="372" y="297" fill="#fff" fontSize="14" fontFamily={FONT}>
+            Pedidos
+          </text>
+          <text
+            className="nv-hot-meta"
+            x="580"
+            y="297"
+            textAnchor="end"
+            fill="rgba(81,60,250,0.8)"
+            fontSize="10"
+            fontFamily={MONO}
+          >
+            núcleo
+          </text>
+
+          <g className="nv-hot-preview">
+            <text x="356" y="342" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily={MONO}>
+              HOY
+            </text>
+            <rect
+              x="356"
+              y="354"
+              width="228"
+              height="44"
+              rx="5"
+              fill="rgba(81,60,250,0.1)"
+              stroke="rgba(81,60,250,0.4)"
+              strokeWidth="0.75"
+            />
+            <text x="368" y="374" fill="rgba(81,60,250,0.95)" fontSize="11" fontFamily={MONO}>
+              #1842
+            </text>
+            <text x="368" y="390" fill="rgba(255,255,255,0.68)" fontSize="12" fontFamily={FONT}>
+              En curso
+            </text>
+            <text
+              x="568"
+              y="382"
+              textAnchor="end"
+              fill="rgba(255,255,255,0.32)"
+              fontSize="10"
+              fontFamily={FONT}
+            >
+              vinculado
+            </text>
+
+            <rect
+              x="356"
+              y="408"
+              width="228"
+              height="36"
+              rx="5"
+              fill="rgba(255,255,255,0.03)"
+              stroke="rgba(255,255,255,0.09)"
+              strokeWidth="0.65"
+            />
+            <text x="368" y="430" fill="rgba(255,255,255,0.42)" fontSize="11" fontFamily={MONO}>
+              #1839 · esperando pago
+            </text>
+          </g>
+
+          <g className="nv-wire" opacity="0">
+            <rect
+              x="356"
+              y="454"
+              width="228"
+              height="36"
+              rx="5"
+              fill="rgba(255,255,255,0.025)"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth="0.65"
+            />
+            <text x="368" y="476" fill="rgba(255,255,255,0.36)" fontSize="11" fontFamily={MONO}>
+              #1831 · en entrega
+            </text>
+            <text x="356" y="514" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily={MONO}>
+              cliente → pedido → pago → entrega
+            </text>
+            <line
+              x1="356"
+              y1="526"
+              x2="540"
+              y2="526"
+              stroke="rgba(81,60,250,0.4)"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+            />
+          </g>
+        </g>
+
+        <g className="nv-sys nv-sys-pagos" opacity="0">
+          <rect
+            x="680"
+            y="300"
+            width="160"
+            height="120"
+            rx="10"
+            fill="rgba(255,255,255,0.04)"
+            stroke="rgba(255,255,255,0.16)"
+            strokeWidth="0.9"
+          />
+          <text x="698" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
+            03
+          </text>
+          <text x="698" y="352" fill="rgba(255,255,255,0.9)" fontSize="15" fontFamily={FONT}>
+            Pagos
+          </text>
+          <line
+            x1="698"
+            y1="366"
+            x2="820"
+            y2="366"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="0.6"
+          />
+          <text x="698" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
+            2 pendientes
+          </text>
+          <text x="698" y="406" fill="rgba(81,60,250,0.55)" fontSize="11" fontFamily={FONT}>
+            1 cobrado
+          </text>
+        </g>
+
+        <g className="nv-sys nv-sys-operacion" opacity="0">
+          <rect
+            x="150"
+            y="560"
+            width="176"
+            height="100"
+            rx="10"
+            fill="rgba(255,255,255,0.035)"
+            stroke="rgba(255,255,255,0.14)"
+            strokeWidth="0.9"
+          />
+          <text x="168" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
+            04
+          </text>
+          <text x="168" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
+            Operación
+          </text>
+          <text x="168" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
+            3 en piso
+          </text>
+        </g>
+
+        <g className="nv-sys nv-sys-reportes" opacity="0">
+          <rect
+            x="580"
+            y="560"
+            width="176"
+            height="100"
+            rx="10"
+            fill="rgba(255,255,255,0.035)"
+            stroke="rgba(255,255,255,0.14)"
+            strokeWidth="0.9"
+          />
+          <text x="598" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
+            05
+          </text>
+          <text x="598" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
+            Reportes
+          </text>
+          <text x="598" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
+            lectura viva
+          </text>
         </g>
       </g>
     </svg>
