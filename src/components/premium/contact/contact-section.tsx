@@ -40,7 +40,7 @@ export function ContactSection() {
               id="contact-title"
               className="font-display text-3xl leading-[1.08] font-medium tracking-[-0.04em] md:text-4xl lg:text-[2.75rem]"
             >
-              Contanos qué querés resolver.
+              Contanos qué estás tratando de resolver.
             </h2>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-white/45">
               No hace falta que tengas definido el producto.

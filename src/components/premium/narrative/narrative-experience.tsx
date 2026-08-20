@@ -6,11 +6,18 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { NarrativeProduct } from "@/components/premium/narrative/narrative-product";
 import { NarrativeWorld } from "@/components/premium/narrative/narrative-world";
+import { MARK_PURPLE, MARK_VIEWBOX } from "@/components/ui/metrik-mark";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-const SCROLL_VH = { desktop: 7, mobile: 5.4 };
+const LOGO_BARS = [
+  "M1.84 56.54 L15.23 56.64 L33.33 37.73 L33.23 23.51 Z",
+  "M36.19 56.84 L47.13 45.39 L47.03 23.92 L36.19 44.98 Z",
+  "M50.61 57.35 L50.61 17.99 L62.06 6.65 L62.06 45.8 Z",
+] as const;
+
+const SCROLL_VH = { desktop: 8.2, mobile: 6.2 };
 
 const BEATS = [
   {
@@ -26,59 +33,57 @@ const BEATS = [
     cta: true,
   },
   {
+    id: "observe",
+    title: (
+      <>
+        Entender
+        <br />
+        antes de construir.
+      </>
+    ),
+  },
+  {
     id: "understand",
     title: (
       <>
-        Antes de escribir código,
+        Encontrar
         <br />
-        entendemos qué tiene que funcionar.
+        el problema correcto.
       </>
     ),
-    body: "El producto empieza mucho antes de la primera pantalla.",
   },
   {
-    id: "arch",
+    id: "structure",
     title: (
       <>
-        Cada decisión
+        Convertir complejidad
         <br />
-        afecta al producto entero.
+        en estructura.
       </>
     ),
-    body: "Estructura clara. Un sistema que se sostiene.",
   },
   {
-    id: "decision",
+    id: "build",
     title: (
       <>
-        No diseñamos pantallas aisladas.
+        Construir lo que
         <br />
-        Pensamos sistemas.
+        realmente necesitás.
       </>
     ),
-    body: "Una decisión conecta el resto.",
-  },
-  {
-    id: "interface",
-    title: (
-      <>
-        La interfaz aparece
-        <br />
-        cuando el sistema ya está claro.
-      </>
-    ),
-    body: "Primero la lógica. Después la pantalla.",
   },
   {
     id: "product",
     title: (
       <>
-        No construimos pantallas.
+        Una operación.
         <br />
-        Construimos herramientas.
+        Un sistema.
+        <br />
+        <span className="text-white/50">Todo conectado.</span>
       </>
     ),
-    body: "Una operación. Un sistema. Todo conectado.",
+    body: "El producto es la consecuencia de haber entendido el problema.",
   },
 ] as const;
 
@@ -87,28 +92,44 @@ function prepDraws(root: HTMLElement) {
     if (typeof node.getTotalLength !== "function") return;
     const len = node.getTotalLength();
     if (!len || !Number.isFinite(len)) return;
-    // Atributos SVG (no px de CSS) para que el trazo empiece oculto
     node.setAttribute("stroke-dasharray", `${len}`);
     node.setAttribute("stroke-dashoffset", `${len}`);
     gsap.set(node, { attr: { "stroke-dashoffset": len } });
   });
 }
 
-/** Corta una capa y recién después muestra la siguiente. Sin crossfade. */
-function hardCut(
+function prepThinkLine(line: SVGPathElement) {
+  const len = line.getTotalLength();
+  if (!len || !Number.isFinite(len)) return 0;
+  // Empieza en cero: sin trazo visible
+  line.setAttribute("stroke-dasharray", `${len}`);
+  line.setAttribute("stroke-dashoffset", `${len}`);
+  gsap.set(line, { attr: { "stroke-dashoffset": len } });
+  return len;
+}
+
+/** Copia izquierda — crossfade suave. */
+function copySwap(
   tl: gsap.core.Timeline,
   leave: string,
   enter: string | null,
-  at: number,
-  dur = 0.03
+  at: number
 ) {
-  tl.to(leave, { autoAlpha: 0, duration: dur }, at);
+  tl.to(leave, { autoAlpha: 0, duration: 0.06, ease: "none" }, at);
   if (enter) {
-    tl.to(enter, { autoAlpha: 1, duration: dur }, at + dur + 0.01);
+    tl.fromTo(
+      enter,
+      { autoAlpha: 0, y: 12 },
+      { autoAlpha: 1, y: 0, duration: 0.08, ease: "none" },
+      at + 0.03
+    );
   }
 }
 
-/** Una sola capa visible. Copy único. Sin apilar. */
+/**
+ * Un mundo continuo. Scrub reversible.
+ * CAOS → OBSERVAR → ENTENDER → ESTRUCTURAR → CONSTRUIR → PRODUCTO
+ */
 export function NarrativeExperience() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -123,17 +144,13 @@ export function NarrativeExperience() {
     if (!section || !stage) return;
 
     if (reducedMotion) {
-      gsap.set(
-        stage.querySelectorAll(
-          ".nv-act-b, .nv-act-c, .nv-act-d, .nv-act-e, .nv-product, .nv-beat:not(.nv-beat-hero)"
-        ),
-        { autoAlpha: 0 }
-      );
-      gsap.set(stage.querySelector(".nv-act-a"), { autoAlpha: 1 });
+      gsap.set(stage.querySelectorAll(".nv-beat:not(.nv-beat-hero)"), { autoAlpha: 0 });
       gsap.set(stage.querySelector(".nv-beat-hero"), { autoAlpha: 1 });
-      const line = stage.querySelector<SVGGeometryElement>("#nv-line");
-      if (line && typeof line.getTotalLength === "function") {
-        gsap.set(line, { attr: { "stroke-dashoffset": 0 } });
+      const line = stage.querySelector<SVGPathElement>("#nv-line");
+      if (line) {
+        const len = line.getTotalLength();
+        line.setAttribute("stroke-dasharray", `${len}`);
+        line.setAttribute("stroke-dashoffset", "0");
       }
       return;
     }
@@ -143,34 +160,37 @@ export function NarrativeExperience() {
 
       const line = stage.querySelector<SVGPathElement>("#nv-line");
       const pulse = stage.querySelector<SVGCircleElement>(".nv-pulse");
-      const lineLen = line && typeof line.getTotalLength === "function" ? line.getTotalLength() : 0;
+      const lineLen = line ? prepThinkLine(line) : 0;
 
-      gsap.set(".nv-act-a", { autoAlpha: 1 });
-      gsap.set(".nv-act-b, .nv-act-c, .nv-act-d, .nv-act-e", { autoAlpha: 0 });
-      gsap.set(".nv-step", { autoAlpha: 0, y: 18 });
-      gsap.set(".nv-row", { autoAlpha: 0, y: 10 });
-      gsap.set(".nv-panel", { autoAlpha: 0, y: 14 });
-      gsap.set(".nv-product", { autoAlpha: 0, y: 16 });
+      gsap.set(".nv-frag-axis", { opacity: 0 });
+      gsap.set(".nv-frag-chaos", { opacity: 1 });
+      gsap.set(".nv-frag", { x: 0, y: 0, opacity: 1 });
+      gsap.set(".nv-sys", { opacity: 0, x: 0, y: 0, scale: 1 });
+      gsap.set(".nv-axis-stage", { opacity: 0 });
+      gsap.set(".nv-sys-links", { opacity: 0 });
+      gsap.set(".nv-wire", { opacity: 0 });
+      gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "450 278" });
+      gsap.set(".nv-product", { autoAlpha: 0, scale: 0.42, y: 36, transformOrigin: "50% 38%" });
+      gsap.set(".nv-logo-forge", { autoAlpha: 0, y: 0 });
+      gsap.set(".nv-logo-bar-0, .nv-logo-bar-1, .nv-logo-bar-2, .nv-logo-word", {
+        autoAlpha: 0,
+        y: 10,
+      });
       gsap.set(".nv-beat", { autoAlpha: 0 });
       gsap.set(".nv-beat-hero", { autoAlpha: 1 });
+      gsap.set(".nv-need", { opacity: 1 });
+      gsap.set(".nv-annos", { opacity: 0.55 });
+      gsap.set(".nv-think", { opacity: 1 });
 
-      // Reset pelota: sin transforms viejos del HMR / path anterior
-      if (pulse) {
-        gsap.set(pulse, {
-          autoAlpha: 0,
-          clearProps: "transform",
-          x: 0,
-          y: 0,
-          xPercent: 0,
-          yPercent: 0,
-        });
-      }
-
-      if (line && lineLen > 0) {
-        line.setAttribute("stroke-dasharray", `${lineLen}`);
-        line.setAttribute("stroke-dashoffset", `${lineLen}`);
-        gsap.set(line, { attr: { "stroke-dasharray": lineLen, "stroke-dashoffset": lineLen } });
-      }
+      const traveler = { p: 0 };
+      const placePulse = () => {
+        if (!pulse || !line || lineLen <= 0) return;
+        const pt = line.getPointAtLength(Math.min(1, Math.max(0, traveler.p)) * lineLen);
+        pulse.setAttribute("cx", String(pt.x));
+        pulse.setAttribute("cy", String(pt.y));
+      };
+      placePulse();
+      if (pulse) gsap.set(pulse, { autoAlpha: 1 });
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -185,7 +205,8 @@ export function NarrativeExperience() {
         },
       });
 
-      /* —— A: traza la línea actual + pelota sobre ESA misma curva —— */
+      /* ——— 0–0.26 OBSERVAR: trazo desde cero ——— */
+      copySwap(tl, ".nv-beat-hero", ".nv-beat-observe", 0.08);
       if (line && lineLen > 0) {
         tl.fromTo(
           line,
@@ -193,66 +214,136 @@ export function NarrativeExperience() {
           { attr: { "stroke-dashoffset": 0 }, duration: 0.26 },
           0
         );
+        tl.fromTo(traveler, { p: 0 }, { p: 1, duration: 0.26, onUpdate: placePulse }, 0);
       }
+      tl.to(".nv-annos", { opacity: 0.2, duration: 0.1 }, 0.16);
 
-      if (pulse && line && lineLen > 0) {
-        // Mover por geometría real del path (no MotionPath/CSS — evita path viejo / HMR)
-        const traveler = { p: 0 };
-        const placePulse = () => {
-          const pt = line.getPointAtLength(traveler.p * lineLen);
-          pulse.setAttribute("cx", String(pt.x));
-          pulse.setAttribute("cy", String(pt.y));
-        };
-        placePulse();
-        tl.to(pulse, { autoAlpha: 1, duration: 0.02 }, 0.01);
-        tl.to(
-          traveler,
-          {
-            p: 1,
-            duration: 0.26,
-            onUpdate: placePulse,
-          },
-          0
-        );
-      }
+      /* ——— 0.26–0.46 ENTENDER: criterios con peso editorial ——— */
+      copySwap(tl, ".nv-beat-observe", ".nv-beat-understand", 0.26);
 
-      /* —— A → B —— */
-      hardCut(tl, ".nv-beat-hero", ".nv-beat-understand", 0.28);
-      hardCut(tl, ".nv-act-a", ".nv-act-b", 0.28);
-      tl.to(".nv-act-b .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.08, stagger: 0.01 }, 0.33);
+      tl.to(".nv-need", { opacity: 0, duration: 0.08 }, 0.26);
+      tl.to(".nv-annos", { opacity: 0, duration: 0.06 }, 0.26);
+      tl.to(".nv-think", { opacity: 0, duration: 0.1 }, 0.28);
+      tl.to(pulse, { autoAlpha: 0, duration: 0.08 }, 0.28);
+      tl.to(".nv-frag-3", { opacity: 0, duration: 0.08 }, 0.28);
 
-      /* —— B → C —— */
-      hardCut(tl, ".nv-beat-understand", ".nv-beat-arch", 0.42);
-      hardCut(tl, ".nv-act-b", ".nv-act-c", 0.42);
-      tl.to(".nv-step-0", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.47);
-      tl.to(".nv-step-1", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.5);
-      tl.to(".nv-step-2", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.53);
-      tl.to(".nv-step-3", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.56);
-      tl.to(".nv-step-4", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.59);
-      tl.to(".nv-act-c .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.07 }, 0.5);
+      // Tres columnas alineadas
+      tl.to(".nv-frag-0", { x: -10, y: 35, duration: 0.14 }, 0.28);
+      tl.to(".nv-frag-1", { x: -20, y: 115, duration: 0.14 }, 0.28);
+      tl.to(".nv-frag-2", { x: 10, y: -50, duration: 0.14 }, 0.28);
 
-      /* —— C → D —— */
-      hardCut(tl, ".nv-beat-arch", ".nv-beat-decision", 0.62);
-      hardCut(tl, ".nv-act-c", ".nv-act-d", 0.62);
-      tl.to(".nv-row", { autoAlpha: 1, y: 0, duration: 0.07, stagger: 0.012 }, 0.67);
+      tl.to(".nv-frag-0 .nv-frag-chaos", { opacity: 0, duration: 0.06 }, 0.34);
+      tl.to(".nv-frag-1 .nv-frag-chaos", { opacity: 0, duration: 0.06 }, 0.35);
+      tl.to(".nv-frag-2 .nv-frag-chaos", { opacity: 0, duration: 0.06 }, 0.36);
 
-      /* —— D → E —— */
-      hardCut(tl, ".nv-beat-decision", ".nv-beat-interface", 0.76);
-      hardCut(tl, ".nv-act-d", ".nv-act-e", 0.76);
-      tl.to(".nv-act-e .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.07 }, 0.81);
-      tl.to(".nv-panel-0", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.82);
-      tl.to(".nv-panel-1", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.84);
-      tl.to(".nv-panel-2", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.86);
-      tl.to(".nv-panel-3", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.88);
-      tl.to(".nv-panel-4", { autoAlpha: 1, y: 0, duration: 0.035 }, 0.9);
+      tl.to(".nv-frag-0 .nv-frag-axis", { opacity: 1, duration: 0.08 }, 0.35);
+      tl.to(".nv-frag-1 .nv-frag-axis", { opacity: 1, duration: 0.08 }, 0.37);
+      tl.to(".nv-frag-2 .nv-frag-axis", { opacity: 1, duration: 0.08 }, 0.39);
 
-      /* —— E → producto —— */
-      hardCut(tl, ".nv-beat-interface", ".nv-beat-product", 0.92);
-      hardCut(tl, ".nv-act-e", null, 0.92);
-      tl.to(".nv-product", { autoAlpha: 1, y: 0, duration: 0.04 }, 0.96);
+      tl.to(".nv-frag-dot", { attr: { r: 4 }, fillOpacity: 1, duration: 0.08 }, 0.36);
 
-      tl.to(".nv-beat-product", { autoAlpha: 0, duration: 0.025 }, 0.985);
-      tl.to(".nv-product", { autoAlpha: 0, y: -12, duration: 0.025 }, 0.99);
+      tl.to(".nv-axis-stage", { opacity: 1, duration: 0.08 }, 0.38);
+      tl.to(".nv-axis-spine", { attr: { "stroke-dashoffset": 0 }, duration: 0.12 }, 0.4);
+
+      /* ——— 0.46–0.54 HANDOFF limpio ——— */
+      copySwap(tl, ".nv-beat-understand", ".nv-beat-structure", 0.46);
+
+      tl.to(".nv-frag", { opacity: 0, duration: 0.08 }, 0.46);
+      tl.to(".nv-axis-stage", { opacity: 0, duration: 0.08 }, 0.46);
+
+      /* ——— 0.54–0.70 ESTRUCTURAR ——— */
+      tl.fromTo(".nv-sys-clientes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.54);
+      tl.fromTo(".nv-sys-pedidos", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.57);
+      tl.fromTo(".nv-sys-pagos", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.6);
+      tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.63);
+      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.66);
+
+      tl.to(".nv-sys-links", { opacity: 1, duration: 0.05 }, 0.6);
+      tl.to(".nv-sys-links .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.1, stagger: 0.02 }, 0.6);
+
+      /* ——— 0.70–0.86 CONSTRUIR: foco en Pedidos ——— */
+      copySwap(tl, ".nv-beat-structure", ".nv-beat-build", 0.7);
+
+      tl.to(".nv-sys-clientes, .nv-sys-pagos, .nv-sys-operacion, .nv-sys-reportes", {
+        opacity: 0.18,
+        duration: 0.1,
+      }, 0.72);
+      tl.to(".nv-sys-links", { opacity: 0.15, duration: 0.1 }, 0.72);
+
+      tl.to(
+        ".nv-camera",
+        {
+          scale: isMobile ? 1.5 : 1.75,
+          x: isMobile ? -16 : -36,
+          y: isMobile ? 36 : 64,
+          duration: 0.12,
+          svgOrigin: "450 278",
+        },
+        0.74
+      );
+
+      tl.to(".nv-hot-frame", { attr: { height: 200, y: 250 }, duration: 0.1 }, 0.76);
+      tl.to(".nv-wire", { opacity: 1, duration: 0.08 }, 0.8);
+      tl.to(".nv-hot-label", { attr: { y: 278 }, duration: 0.08 }, 0.76);
+
+      /* ——— 0.82–0.90 PRODUCTO ——— */
+      tl.to(".nv-sys-clientes, .nv-sys-pagos, .nv-sys-operacion, .nv-sys-reportes", {
+        opacity: 0,
+        duration: 0.07,
+      }, 0.82);
+      tl.to(".nv-sys-links", { opacity: 0, duration: 0.05 }, 0.82);
+      tl.to(".nv-sys-pedidos", { opacity: 0.22, duration: 0.07 }, 0.82);
+
+      tl.to(
+        ".nv-product",
+        {
+          autoAlpha: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.09,
+          transformOrigin: "50% 38%",
+        },
+        0.84
+      );
+
+      tl.to(".nv-camera", { opacity: 0.1, duration: 0.07 }, 0.86);
+      tl.to(".nv-sys-pedidos", { opacity: 0, duration: 0.05 }, 0.86);
+      copySwap(tl, ".nv-beat-build", ".nv-beat-product", 0.84);
+
+      /* ——— 0.90–1.0 LOGO: se fabrica al centro ——— */
+      tl.to(".nv-product", { autoAlpha: 0, scale: 0.94, y: -16, duration: 0.06 }, 0.9);
+      tl.to(".nv-beat-product", { autoAlpha: 0, duration: 0.05 }, 0.9);
+      tl.to(".nv-camera", { opacity: 0, duration: 0.05 }, 0.9);
+
+      tl.to(".nv-logo-forge", { autoAlpha: 1, duration: 0.04 }, 0.91);
+      tl.fromTo(
+        ".nv-logo-bar-0",
+        { autoAlpha: 0, y: 10 },
+        { autoAlpha: 1, y: 0, duration: 0.035 },
+        0.915
+      );
+      tl.fromTo(
+        ".nv-logo-bar-1",
+        { autoAlpha: 0, y: 10 },
+        { autoAlpha: 1, y: 0, duration: 0.035 },
+        0.935
+      );
+      tl.fromTo(
+        ".nv-logo-bar-2",
+        { autoAlpha: 0, y: 10 },
+        { autoAlpha: 1, y: 0, duration: 0.035 },
+        0.955
+      );
+      tl.fromTo(
+        ".nv-logo-word",
+        { autoAlpha: 0, y: 6 },
+        { autoAlpha: 1, y: 0, duration: 0.04 },
+        0.965
+      );
+
+      // Hold breve y salida hacia el resto del site
+      tl.to(".nv-logo-forge", { autoAlpha: 1, duration: 0.015 }, 0.985);
+      tl.to(".nv-logo-forge", { autoAlpha: 0, y: -8, duration: 0.015 }, 0.995);
 
       requestAnimationFrame(() => ScrollTrigger.refresh());
     }, stage);
@@ -323,11 +414,34 @@ export function NarrativeExperience() {
             </div>
           </div>
 
-          <div className="relative z-10 min-h-[42vh] flex-1 overflow-hidden lg:min-h-0">
-            <div className="absolute inset-0 opacity-90">
+          <div className="relative z-10 min-h-[44vh] flex-1 overflow-hidden lg:min-h-0">
+            <div className="absolute inset-0">
               <NarrativeWorld />
               <NarrativeProduct />
             </div>
+          </div>
+        </div>
+
+        {/* Logo forjado al centro — cierre de la secuencia */}
+        <div
+          className="nv-logo-forge pointer-events-none absolute inset-0 z-30 flex items-center justify-center"
+          style={{ visibility: "hidden", opacity: 0 }}
+          aria-hidden
+        >
+          <div className="flex items-center gap-3.5">
+            <svg
+              viewBox={MARK_VIEWBOX}
+              className="size-11 text-white sm:size-12"
+              fill="none"
+              aria-hidden
+            >
+              <path className="nv-logo-bar-0" d={LOGO_BARS[0]} fill="currentColor" />
+              <path className="nv-logo-bar-1" d={LOGO_BARS[1]} fill="currentColor" />
+              <path className="nv-logo-bar-2" d={LOGO_BARS[2]} fill={MARK_PURPLE} />
+            </svg>
+            <span className="nv-logo-word font-display text-[1.35rem] font-medium tracking-[-0.04em] text-white sm:text-[1.5rem]">
+              Metrik
+            </span>
           </div>
         </div>
       </div>

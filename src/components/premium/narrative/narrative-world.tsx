@@ -1,38 +1,71 @@
 const FONT = "var(--font-display), system-ui, sans-serif";
 const MONO = "var(--font-mono), ui-monospace, monospace";
 
-/** Waypoints: una sola curva suave pasa exactamente por cada uno. */
-const NEED_NODES = [
-  { x: 110, y: 210, label: null as string | null },
-  { x: 230, y: 355, label: "Clientes" },
-  { x: 510, y: 300, label: "Pedidos" },
-  { x: 300, y: 510, label: "Equipo" },
-  { x: 640, y: 560, label: "Pagos" },
-  { x: 410, y: 730, label: "Reportes" },
+/** Waypoints del pensamiento — curva suave, sin ángulos. */
+const THINK = [
+  { x: 90, y: 228 }, // nace bajo NECESIDAD
+  { x: 210, y: 385 }, // Información dispersa
+  { x: 470, y: 305 }, // Procesos manuales
+  { x: 690, y: 470 }, // Seguimiento difícil
+  { x: 360, y: 640 }, // Trabajo duplicado
 ] as const;
 
-/** Catmull-Rom → cubic Bezier continua (sin tramos rectos). */
+const FRAGS = [
+  {
+    chaos: "Información dispersa",
+    axis: "CENTRALIZAR",
+    detail: "Una sola fuente de verdad",
+    num: "01",
+    i: 1,
+  },
+  {
+    chaos: "Procesos manuales",
+    axis: "AUTOMATIZAR",
+    detail: "Flujos que corren solos",
+    num: "02",
+    i: 2,
+  },
+  {
+    chaos: "Seguimiento difícil",
+    axis: "ENTENDER",
+    detail: "Visibilidad continua",
+    num: "03",
+    i: 3,
+  },
+  {
+    chaos: "Trabajo duplicado",
+    axis: null,
+    detail: null,
+    num: null,
+    i: 4,
+  },
+] as const;
+
+/** Catmull-Rom → cubic Bezier continuo. */
 function curveThrough(points: readonly { x: number; y: number }[]) {
-  if (points.length < 2) return "";
   const p = points.map((pt) => ({ x: pt.x, y: pt.y }));
+  if (p.length < 2) return "";
   let d = `M ${p[0].x} ${p[0].y}`;
   for (let i = 0; i < p.length - 1; i++) {
     const p0 = p[i - 1] ?? p[i];
     const p1 = p[i];
     const p2 = p[i + 1];
     const p3 = p[i + 2] ?? p[i + 1];
-    const cp1x = p1.x + (p2.x - p0.x) / 6;
-    const cp1y = p1.y + (p2.y - p0.y) / 6;
-    const cp2x = p2.x - (p3.x - p1.x) / 6;
-    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    // /5 = más suave que /6 (menos tensión, menos “pico”)
+    const cp1x = p1.x + (p2.x - p0.x) / 5;
+    const cp1y = p1.y + (p2.y - p0.y) / 5;
+    const cp2x = p2.x - (p3.x - p1.x) / 5;
+    const cp2y = p2.y - (p3.y - p1.y) / 5;
     d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x} ${p2.y}`;
   }
   return d;
 }
 
-const NEED_PATH = curveThrough(NEED_NODES);
+const THINK_PATH = curveThrough(THINK);
 
-/** Escena derecha. Capas exclusivas — una sola visible. */
+/**
+ * Un solo mundo SVG. Los mismos nodos mutan de caos → ejes → sistema → módulo.
+ */
 export function NarrativeWorld() {
   return (
     <svg
@@ -42,267 +75,277 @@ export function NarrativeWorld() {
       aria-hidden
       preserveAspectRatio="xMidYMid meet"
     >
-      {/* ACTO A — una sola curva por todos los conceptos */}
-      <g className="nv-act nv-act-a" style={{ opacity: 1 }}>
-        <text x="80" y="168" fill="rgba(81,60,250,0.95)" fontSize="11" fontFamily={MONO} letterSpacing="2.4">
-          NECESIDAD
-        </text>
+      <g className="nv-camera">
+        {/* NECESIDAD */}
+        <g className="nv-need">
+          <text
+            x="72"
+            y="118"
+            fill="rgba(81,60,250,0.95)"
+            fontSize="11"
+            fontFamily={MONO}
+            letterSpacing="2.6"
+          >
+            NECESIDAD / 01
+          </text>
+          <text x="72" y="172" fill="rgba(255,255,255,0.92)" fontSize="28" fontFamily={FONT}>
+            La operación creció.
+          </text>
+          <text x="72" y="208" fill="rgba(255,255,255,0.48)" fontSize="28" fontFamily={FONT}>
+            Las herramientas no.
+          </text>
+        </g>
 
+        {/* Anotaciones — lejos del trazado para no competir */}
+        <g className="nv-annos">
+          <text x="560" y="150" fill="rgba(255,255,255,0.22)" fontSize="11" fontFamily={MONO}>
+            excel + wsp
+          </text>
+          <text x="760" y="360" fill="rgba(255,255,255,0.18)" fontSize="11" fontFamily={MONO}>
+            sin dueño
+          </text>
+          <text x="80" y="560" fill="rgba(255,255,255,0.16)" fontSize="11" fontFamily={MONO}>
+            ¿quién actualiza?
+          </text>
+        </g>
+
+        {/* Una sola línea de pensamiento */}
         <path
           id="nv-line"
-          className="nv-draw nv-draw-main"
-          d={NEED_PATH}
+          className="nv-think"
+          d={THINK_PATH}
           stroke="#513CFA"
-          strokeWidth="1.7"
+          strokeWidth="1.65"
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeDasharray="1"
-          strokeDashoffset="1"
+          fill="none"
         />
+        <circle className="nv-pulse" r="4" fill="#513CFA" cx={THINK[0].x} cy={THINK[0].y} />
 
-        <circle
-          className="nv-pulse"
-          r="4.5"
-          fill="#513CFA"
-          cx={NEED_NODES[0].x}
-          cy={NEED_NODES[0].y}
-        />
+        {/* Fragmentos → criterios */}
+        {FRAGS.map((f) => {
+          const pt = THINK[f.i];
+          return (
+            <g key={f.chaos} className={`nv-frag nv-frag-${f.i - 1}`}>
+              <circle className="nv-frag-dot" cx={pt.x} cy={pt.y} r="3.2" fill="#513CFA" fillOpacity="0.7" />
+              <text
+                className="nv-frag-chaos"
+                x={pt.x}
+                y={pt.y - 16}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.52)"
+                fontSize="15"
+                fontFamily={FONT}
+              >
+                {f.chaos}
+              </text>
+              {f.axis && f.num && f.detail ? (
+                <g className="nv-frag-axis" opacity="0">
+                  <text
+                    x={pt.x}
+                    y={pt.y - 52}
+                    textAnchor="middle"
+                    fill="rgba(81,60,250,0.9)"
+                    fontSize="11"
+                    fontFamily={MONO}
+                    letterSpacing="2.2"
+                  >
+                    {f.num}
+                  </text>
+                  <text
+                    x={pt.x}
+                    y={pt.y - 18}
+                    textAnchor="middle"
+                    fill="rgba(255,255,255,0.95)"
+                    fontSize="20"
+                    fontFamily={FONT}
+                    letterSpacing="1.6"
+                  >
+                    {f.axis}
+                  </text>
+                  <line
+                    x1={pt.x - 56}
+                    y1={pt.y + 4}
+                    x2={pt.x + 56}
+                    y2={pt.y + 4}
+                    stroke="rgba(81,60,250,0.45)"
+                    strokeWidth="0.9"
+                  />
+                  <text
+                    x={pt.x}
+                    y={pt.y + 28}
+                    textAnchor="middle"
+                    fill="rgba(255,255,255,0.28)"
+                    fontSize="12"
+                    fontFamily={FONT}
+                  >
+                    {f.chaos}
+                  </text>
+                  <text
+                    x={pt.x}
+                    y={pt.y + 50}
+                    textAnchor="middle"
+                    fill="rgba(255,255,255,0.55)"
+                    fontSize="13"
+                    fontFamily={FONT}
+                  >
+                    {f.detail}
+                  </text>
+                </g>
+              ) : null}
+            </g>
+          );
+        })}
 
-        {NEED_NODES.filter((n) => n.label).map((n) => (
-          <g key={n.label} className="nv-node">
-            <circle cx={n.x} cy={n.y} r="3.4" fill="#513CFA" fillOpacity="0.75" />
-            <text
-              x={n.x}
-              y={n.y - 16}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.58)"
-              fontSize="15"
-              fontFamily={FONT}
-            >
-              {n.label}
+        {/* Estructura de criterios — spine + marco editorial */}
+        <g className="nv-axis-stage" opacity="0">
+          <text
+            x="450"
+            y="250"
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.28)"
+            fontSize="11"
+            fontFamily={MONO}
+            letterSpacing="2.8"
+          >
+            CRITERIOS
+          </text>
+          <line x1="140" y1="280" x2="760" y2="280" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
+          <path
+            className="nv-draw nv-axis-spine"
+            d="M 160 420 C 280 390, 360 390, 450 420 S 620 450, 740 420"
+            stroke="#513CFA"
+            strokeWidth="1.35"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </g>
+
+        {/* Sistema */}
+        <g className="nv-sys nv-sys-clientes" opacity="0">
+          <rect x="70" y="250" width="180" height="56" stroke="rgba(255,255,255,0.22)" strokeWidth="0.9" />
+          <text
+            x="160"
+            y="285"
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.85)"
+            fontSize="15"
+            fontFamily={FONT}
+            letterSpacing="1.2"
+          >
+            CLIENTES
+          </text>
+        </g>
+
+        <g className="nv-sys nv-sys-pedidos" opacity="0">
+          <rect
+            className="nv-hot-frame"
+            x="350"
+            y="250"
+            width="200"
+            height="56"
+            stroke="rgba(81,60,250,0.85)"
+            strokeWidth="1.15"
+          />
+          <text
+            className="nv-hot-label"
+            x="450"
+            y="285"
+            textAnchor="middle"
+            fill="#fff"
+            fontSize="15"
+            fontFamily={FONT}
+            letterSpacing="1.2"
+          >
+            PEDIDOS
+          </text>
+          <g className="nv-wire" opacity="0">
+            <rect x="360" y="320" width="180" height="120" stroke="rgba(255,255,255,0.16)" strokeWidth="0.75" />
+            <line x1="360" y1="348" x2="540" y2="348" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6" />
+            <text x="372" y="372" fill="rgba(81,60,250,0.9)" fontSize="10" fontFamily={MONO}>
+              #1842
             </text>
+            <text x="372" y="396" fill="rgba(255,255,255,0.55)" fontSize="13" fontFamily={FONT}>
+              En curso
+            </text>
+            <line x1="372" y1="412" x2="500" y2="412" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+            <line x1="372" y1="428" x2="480" y2="428" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
           </g>
-        ))}
-      </g>
+        </g>
 
-      {/* ACTO B — operación (solo curvas) */}
-      <g className="nv-act nv-act-b" style={{ opacity: 0, visibility: "hidden" }}>
-        <rect x="340" y="380" width="220" height="64" stroke="rgba(81,60,250,0.75)" strokeWidth="1.1" />
-        <text x="450" y="420" textAnchor="middle" fill="#fff" fontSize="17" fontFamily={FONT} letterSpacing="1.8">
-          OPERACIÓN
-        </text>
-
-        <path
-          className="nv-draw"
-          d="M 180 280 Q 240 340, 340 400"
-          stroke="rgba(255,255,255,0.25)"
-          strokeWidth="0.85"
-          strokeLinecap="round"
-        />
-        <path
-          className="nv-draw"
-          d="M 680 260 Q 620 320, 560 390"
-          stroke="rgba(255,255,255,0.22)"
-          strokeWidth="0.85"
-          strokeLinecap="round"
-        />
-        <path
-          className="nv-draw"
-          d="M 200 560 Q 260 500, 340 430"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-        />
-        <path
-          className="nv-draw"
-          d="M 720 540 Q 650 490, 560 430"
-          stroke="rgba(255,255,255,0.22)"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-        />
-        <path
-          className="nv-draw"
-          d="M 450 640 Q 450 540, 450 444"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-        />
-
-        <text x="140" y="268" fill="rgba(255,255,255,0.7)" fontSize="15" fontFamily={FONT}>
-          Clientes
-        </text>
-        <text x="680" y="248" fill="rgba(255,255,255,0.7)" fontSize="15" fontFamily={FONT}>
-          Pedidos
-        </text>
-        <text x="140" y="572" fill="rgba(255,255,255,0.65)" fontSize="15" fontFamily={FONT}>
-          Equipo
-        </text>
-        <text x="720" y="552" fill="rgba(255,255,255,0.65)" fontSize="15" fontFamily={FONT}>
-          Pagos
-        </text>
-        <text x="450" y="668" textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize="15" fontFamily={FONT}>
-          Reportes
-        </text>
-      </g>
-
-      {/* ACTO C — cadena */}
-      <g className="nv-act nv-act-c" style={{ opacity: 0, visibility: "hidden" }}>
-        {[
-          { y: 180, label: "CLIENTE", hot: false },
-          { y: 290, label: "PEDIDO", hot: true },
-          { y: 400, label: "ESTADO", hot: false },
-          { y: 510, label: "PAGO", hot: false },
-          { y: 620, label: "ENTREGA", hot: false },
-        ].map((n, i, arr) => (
-          <g key={n.label} className={`nv-step nv-step-${i}`}>
-            <rect
-              x={280}
-              y={n.y}
-              width={340}
-              height={68}
-              stroke={n.hot ? "rgba(81,60,250,0.9)" : "rgba(255,255,255,0.22)"}
-              strokeWidth={n.hot ? 1.15 : 0.75}
-            />
-            <text
-              x={450}
-              y={n.y + 42}
-              textAnchor="middle"
-              fill={n.hot ? "#fff" : "rgba(255,255,255,0.78)"}
-              fontSize="16"
-              fontFamily={FONT}
-              letterSpacing="2"
-            >
-              {n.label}
-            </text>
-            {i < arr.length - 1 ? (
-              <path
-                className="nv-draw"
-                d={`M 450 ${n.y + 68} Q 450 ${(n.y + 68 + arr[i + 1].y) / 2}, 450 ${arr[i + 1].y}`}
-                stroke="rgba(255,255,255,0.2)"
-                strokeWidth="0.75"
-                strokeLinecap="round"
-              />
-            ) : null}
-          </g>
-        ))}
-      </g>
-
-      {/* ACTO D — detalle */}
-      <g className="nv-act nv-act-d" style={{ opacity: 0, visibility: "hidden" }}>
-        <text x="80" y="150" fill="rgba(81,60,250,0.95)" fontSize="11" fontFamily={MONO} letterSpacing="2.2">
-          PEDIDO
-        </text>
-
-        {[
-          ["Cliente", "vinculado al pedido"],
-          ["Estado", "pendiente → en curso"],
-          ["Pago", "condiciona la entrega"],
-          ["Responsable", "asignado al flujo"],
-          ["Historial", "queda registrado"],
-        ].map(([k, v], i) => (
-          <g key={k} className={`nv-row nv-row-${i}`}>
-            <line
-              x1="80"
-              y1={220 + i * 90}
-              x2="820"
-              y2={220 + i * 90}
-              stroke="rgba(255,255,255,0.1)"
-              strokeWidth="0.6"
-            />
-            <text x="80" y={268 + i * 90} fill="rgba(255,255,255,0.78)" fontSize="18" fontFamily={FONT}>
-              {k}
-            </text>
-            <text
-              x="820"
-              y={268 + i * 90}
-              textAnchor="end"
-              fill="rgba(255,255,255,0.32)"
-              fontSize="14"
-              fontFamily={MONO}
-            >
-              {v}
-            </text>
-          </g>
-        ))}
-      </g>
-
-      {/* ACTO E — wire UI */}
-      <g className="nv-act nv-act-e" style={{ opacity: 0, visibility: "hidden" }}>
-        <rect
-          className="nv-draw"
-          x="60"
-          y="140"
-          width="780"
-          height="580"
-          stroke="rgba(255,255,255,0.16)"
-          strokeWidth="0.85"
-        />
-        <line
-          className="nv-draw"
-          x1="140"
-          y1="140"
-          x2="140"
-          y2="720"
-          stroke="rgba(255,255,255,0.12)"
-          strokeWidth="0.7"
-        />
-        <line
-          className="nv-draw"
-          x1="140"
-          y1="200"
-          x2="840"
-          y2="200"
-          stroke="rgba(255,255,255,0.1)"
-          strokeWidth="0.65"
-        />
-
-        <g className="nv-panel nv-panel-0">
-          <rect x="168" y="232" width="200" height="100" stroke="rgba(255,255,255,0.2)" strokeWidth="0.75" />
-          <text x="188" y="268" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={MONO}>
-            CLIENTE
-          </text>
-          <text x="188" y="302" fill="rgba(255,255,255,0.88)" fontSize="17" fontFamily={FONT}>
-            Registro activo
+        <g className="nv-sys nv-sys-pagos" opacity="0">
+          <rect x="650" y="250" width="180" height="56" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9" />
+          <text
+            x="740"
+            y="285"
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.8)"
+            fontSize="15"
+            fontFamily={FONT}
+            letterSpacing="1.2"
+          >
+            PAGOS
           </text>
         </g>
-        <g className="nv-panel nv-panel-1">
-          <rect x="388" y="232" width="220" height="100" stroke="rgba(81,60,250,0.6)" strokeWidth="0.95" />
-          <text x="408" y="268" fill="rgba(81,60,250,0.9)" fontSize="11" fontFamily={MONO}>
-            PEDIDO
-          </text>
-          <text x="408" y="302" fill="#fff" fontSize="17" fontFamily={FONT}>
-            #1842 · En curso
-          </text>
-        </g>
-        <g className="nv-panel nv-panel-2">
-          <rect x="628" y="232" width="190" height="100" stroke="rgba(255,255,255,0.16)" strokeWidth="0.75" />
-          <text x="648" y="268" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={MONO}>
-            ESTADO
-          </text>
-          <text x="648" y="302" fill="rgba(255,255,255,0.85)" fontSize="17" fontFamily={FONT}>
-            Operativo
+
+        <g className="nv-sys nv-sys-operacion" opacity="0">
+          <rect x="300" y="430" width="300" height="56" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9" />
+          <text
+            x="450"
+            y="465"
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.8)"
+            fontSize="15"
+            fontFamily={FONT}
+            letterSpacing="1.2"
+          >
+            OPERACIÓN
           </text>
         </g>
-        <g className="nv-panel nv-panel-3">
-          <rect x="168" y="360" width="320" height="160" stroke="rgba(255,255,255,0.14)" strokeWidth="0.75" />
-          <text x="188" y="396" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={MONO}>
-            PAGO
-          </text>
-          <line x1="188" y1="428" x2="440" y2="428" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-          <line x1="188" y1="456" x2="400" y2="456" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-          <line x1="188" y1="484" x2="420" y2="484" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-        </g>
-        <g className="nv-panel nv-panel-4">
-          <rect x="512" y="360" width="306" height="160" stroke="rgba(255,255,255,0.14)" strokeWidth="0.75" />
-          <text x="532" y="396" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={MONO}>
+
+        <g className="nv-sys nv-sys-reportes" opacity="0">
+          <rect x="300" y="560" width="300" height="56" stroke="rgba(255,255,255,0.18)" strokeWidth="0.9" />
+          <text
+            x="450"
+            y="595"
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.75)"
+            fontSize="15"
+            fontFamily={FONT}
+            letterSpacing="1.2"
+          >
             REPORTES
           </text>
+        </g>
+
+        <g className="nv-sys-links" opacity="0">
           <path
             className="nv-draw"
-            d="M 548 480 C 600 480, 620 430, 680 440 S 760 420, 790 426"
-            stroke="#513CFA"
-            strokeWidth="1.2"
-            strokeLinecap="round"
+            d="M 250 278 C 290 278, 310 278, 350 278"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="0.75"
+            fill="none"
+          />
+          <path
+            className="nv-draw"
+            d="M 550 278 C 590 278, 610 278, 650 278"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="0.75"
+            fill="none"
+          />
+          <path
+            className="nv-draw"
+            d="M 450 306 C 450 350, 450 390, 450 430"
+            stroke="rgba(81,60,250,0.5)"
+            strokeWidth="0.9"
+            fill="none"
+          />
+          <path
+            className="nv-draw"
+            d="M 450 486 C 450 520, 450 540, 450 560"
+            stroke="rgba(255,255,255,0.18)"
+            strokeWidth="0.75"
+            fill="none"
           />
         </g>
       </g>

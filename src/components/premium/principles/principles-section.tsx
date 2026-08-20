@@ -7,19 +7,25 @@ const PRINCIPLES = [
     n: "01",
     title: "Entender",
     lead: "Pensamos antes de construir.",
-    body: "Primero entendemos el problema, la operación y lo que realmente necesita funcionar.",
+    body: "Primero el problema, la operación y lo que realmente necesita funcionar.",
   },
   {
     n: "02",
     title: "Diseñar",
     lead: "Diseñamos alrededor del sistema.",
-    body: "Cada pantalla, interacción y decisión responde a una razón.",
+    body: "Cada pantalla y decisión responde a una razón.",
   },
   {
     n: "03",
     title: "Construir",
     lead: "Construimos para que dure.",
-    body: "Productos sólidos, mantenibles y preparados para evolucionar.",
+    body: "Productos sólidos, mantenibles y listos para evolucionar.",
+  },
+  {
+    n: "04",
+    title: "Iterar",
+    lead: "Seguimos después del lanzamiento.",
+    body: "Medimos, ajustamos y mejoramos con uso real.",
   },
 ] as const;
 
@@ -37,7 +43,7 @@ export function PrinciplesSection() {
           Cómo pensamos
         </h2>
 
-        <div className="mt-16 grid gap-12 md:grid-cols-3 md:gap-10">
+        <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {PRINCIPLES.map((item) => (
             <article key={item.n}>
               <p className="font-mono text-[11px] tracking-[0.16em] text-accent/70">
