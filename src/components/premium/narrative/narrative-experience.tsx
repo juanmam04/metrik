@@ -17,7 +17,7 @@ const LOGO_BARS = [
   "M50.61 57.35 L50.61 17.99 L62.06 6.65 L62.06 45.8 Z",
 ] as const;
 
-const SCROLL_VH = { desktop: 8.2, mobile: 6.2 };
+const SCROLL_VH = { desktop: 9.8, mobile: 7.4 };
 
 const BEATS = [
   {
@@ -170,7 +170,12 @@ export function NarrativeExperience() {
       gsap.set(".nv-sys-links", { opacity: 0 });
       gsap.set(".nv-wire", { opacity: 0 });
       gsap.set(".nv-camera", { x: 0, y: 0, scale: 1, opacity: 1, svgOrigin: "450 278" });
-      gsap.set(".nv-product", { autoAlpha: 0, scale: 0.42, y: 36, transformOrigin: "50% 38%" });
+      gsap.set(".nv-product", {
+        autoAlpha: 0,
+        scale: 0.92,
+        y: 24,
+        transformOrigin: "50% 45%",
+      });
       gsap.set(".nv-logo-forge", { autoAlpha: 0, y: 0 });
       gsap.set(".nv-logo-bar-0, .nv-logo-bar-1, .nv-logo-bar-2, .nv-logo-word", {
         autoAlpha: 0,
@@ -179,8 +184,16 @@ export function NarrativeExperience() {
       gsap.set(".nv-beat", { autoAlpha: 0 });
       gsap.set(".nv-beat-hero", { autoAlpha: 1 });
       gsap.set(".nv-need", { opacity: 1 });
-      gsap.set(".nv-annos", { opacity: 0.55 });
+      gsap.set(".nv-atmosphere", { opacity: 0.9 });
+      gsap.set(".nv-annos", { opacity: 0.35 });
+      gsap.set(".nv-deadends", { opacity: 0.35 });
       gsap.set(".nv-think", { opacity: 1 });
+      gsap.set(".nv-think-glow", { opacity: 0 });
+      gsap.set(".nv-pulse-ring", { opacity: 0 });
+      gsap.set(".nv-frag-halo", { opacity: 0.15 });
+      gsap.set(".nv-frag-chaos", { opacity: 0.2 });
+      gsap.set(".nv-frag-tick", { opacity: 0.15 });
+      gsap.set(".nv-frag-tag", { opacity: 0.35 });
 
       const traveler = { p: 0 };
       const placePulse = () => {
@@ -188,9 +201,22 @@ export function NarrativeExperience() {
         const pt = line.getPointAtLength(Math.min(1, Math.max(0, traveler.p)) * lineLen);
         pulse.setAttribute("cx", String(pt.x));
         pulse.setAttribute("cy", String(pt.y));
+        const ring = stage.querySelector(".nv-pulse-ring");
+        if (ring) {
+          ring.setAttribute("cx", String(pt.x));
+          ring.setAttribute("cy", String(pt.y));
+        }
       };
       placePulse();
       if (pulse) gsap.set(pulse, { autoAlpha: 1 });
+
+      // Glow bajo el trazo: mismo dash que la línea (empieza vacío)
+      const glow = stage.querySelector<SVGPathElement>(".nv-think-glow");
+      if (glow && lineLen > 0) {
+        glow.setAttribute("stroke-dasharray", `${lineLen}`);
+        glow.setAttribute("stroke-dashoffset", `${lineLen}`);
+        gsap.set(glow, { attr: { "stroke-dashoffset": lineLen }, opacity: 0 });
+      }
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -205,7 +231,7 @@ export function NarrativeExperience() {
         },
       });
 
-      /* ——— 0–0.26 OBSERVAR: trazo desde cero ——— */
+      /* ——— 0–0.26 OBSERVAR: trazo desde cero + nodos que se “descubren” ——— */
       copySwap(tl, ".nv-beat-hero", ".nv-beat-observe", 0.08);
       if (line && lineLen > 0) {
         tl.fromTo(
@@ -214,17 +240,59 @@ export function NarrativeExperience() {
           { attr: { "stroke-dashoffset": 0 }, duration: 0.26 },
           0
         );
+        if (glow) {
+          tl.fromTo(
+            glow,
+            { attr: { "stroke-dashoffset": lineLen }, opacity: 0 },
+            { attr: { "stroke-dashoffset": 0 }, opacity: 0.55, duration: 0.26 },
+            0
+          );
+        }
         tl.fromTo(traveler, { p: 0 }, { p: 1, duration: 0.26, onUpdate: placePulse }, 0);
       }
-      tl.to(".nv-annos", { opacity: 0.2, duration: 0.1 }, 0.16);
+      tl.to(".nv-pulse-ring", { opacity: 0.75, duration: 0.04 }, 0.02);
+      tl.to(".nv-annos", { opacity: 1, duration: 0.1 }, 0.04);
+      tl.to(".nv-deadends", { opacity: 0.9, duration: 0.12 }, 0.06);
+
+      // Cada síntoma gana presencia cuando el criterio lo alcanza
+      tl.to(".nv-frag-0 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.055);
+      tl.to(".nv-frag-0 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.055);
+      tl.to(".nv-frag-0 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.055);
+      tl.to(".nv-frag-0 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.055);
+
+      tl.to(".nv-frag-1 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.11);
+      tl.to(".nv-frag-1 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.11);
+      tl.to(".nv-frag-1 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.11);
+      tl.to(".nv-frag-1 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.11);
+
+      tl.to(".nv-frag-2 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.165);
+      tl.to(".nv-frag-2 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.165);
+      tl.to(".nv-frag-2 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.165);
+      tl.to(".nv-frag-2 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.165);
+
+      tl.to(".nv-frag-3 .nv-frag-chaos", { opacity: 1, duration: 0.03 }, 0.22);
+      tl.to(".nv-frag-3 .nv-frag-halo", { opacity: 0.95, duration: 0.03 }, 0.22);
+      tl.to(".nv-frag-3 .nv-frag-tick", { opacity: 0.85, duration: 0.03 }, 0.22);
+      tl.to(".nv-frag-3 .nv-frag-tag", { opacity: 1, duration: 0.03 }, 0.22);
+
+      // Al cerrar el trazo, el ruido periférico baja — ya vimos el patrón
+      tl.to(".nv-annos", { opacity: 0.45, duration: 0.08 }, 0.2);
+      tl.to(".nv-deadends", { opacity: 0.35, duration: 0.08 }, 0.2);
 
       /* ——— 0.26–0.46 ENTENDER: criterios con peso editorial ——— */
       copySwap(tl, ".nv-beat-observe", ".nv-beat-understand", 0.26);
 
       tl.to(".nv-need", { opacity: 0, duration: 0.08 }, 0.26);
+      tl.to(".nv-atmosphere", { opacity: 0, duration: 0.08 }, 0.26);
       tl.to(".nv-annos", { opacity: 0, duration: 0.06 }, 0.26);
+      tl.to(".nv-deadends", { opacity: 0, duration: 0.06 }, 0.26);
       tl.to(".nv-think", { opacity: 0, duration: 0.1 }, 0.28);
+      tl.to(".nv-think-glow", { opacity: 0, duration: 0.08 }, 0.28);
       tl.to(pulse, { autoAlpha: 0, duration: 0.08 }, 0.28);
+      tl.to(".nv-pulse-ring", { opacity: 0, duration: 0.06 }, 0.28);
+      tl.to(".nv-frag-tag", { opacity: 0, duration: 0.06 }, 0.3);
+      tl.to(".nv-frag-tick", { opacity: 0, duration: 0.06 }, 0.3);
+      tl.to(".nv-frag-halo", { opacity: 0, duration: 0.08 }, 0.3);
       tl.to(".nv-frag-3", { opacity: 0, duration: 0.08 }, 0.28);
 
       // Tres columnas alineadas
@@ -251,24 +319,24 @@ export function NarrativeExperience() {
       tl.to(".nv-frag", { opacity: 0, duration: 0.08 }, 0.46);
       tl.to(".nv-axis-stage", { opacity: 0, duration: 0.08 }, 0.46);
 
-      /* ——— 0.54–0.70 ESTRUCTURAR ——— */
+      /* ——— 0.54–0.66 ESTRUCTURAR ——— */
       tl.fromTo(".nv-sys-clientes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.54);
       tl.fromTo(".nv-sys-pedidos", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.57);
       tl.fromTo(".nv-sys-pagos", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.6);
       tl.fromTo(".nv-sys-operacion", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.63);
-      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.66);
+      tl.fromTo(".nv-sys-reportes", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.07 }, 0.65);
 
       tl.to(".nv-sys-links", { opacity: 1, duration: 0.05 }, 0.6);
       tl.to(".nv-sys-links .nv-draw", { attr: { "stroke-dashoffset": 0 }, duration: 0.1, stagger: 0.02 }, 0.6);
 
-      /* ——— 0.70–0.86 CONSTRUIR: foco en Pedidos ——— */
-      copySwap(tl, ".nv-beat-structure", ".nv-beat-build", 0.7);
+      /* ——— 0.66–0.82 CONSTRUIR: zoom + hold en Pedidos ——— */
+      copySwap(tl, ".nv-beat-structure", ".nv-beat-build", 0.66);
 
       tl.to(".nv-sys-clientes, .nv-sys-pagos, .nv-sys-operacion, .nv-sys-reportes", {
         opacity: 0.18,
         duration: 0.1,
-      }, 0.72);
-      tl.to(".nv-sys-links", { opacity: 0.15, duration: 0.1 }, 0.72);
+      }, 0.68);
+      tl.to(".nv-sys-links", { opacity: 0.15, duration: 0.1 }, 0.68);
 
       tl.to(
         ".nv-camera",
@@ -279,71 +347,73 @@ export function NarrativeExperience() {
           duration: 0.12,
           svgOrigin: "450 278",
         },
-        0.74
+        0.7
       );
 
-      tl.to(".nv-hot-frame", { attr: { height: 200, y: 250 }, duration: 0.1 }, 0.76);
-      tl.to(".nv-wire", { opacity: 1, duration: 0.08 }, 0.8);
-      tl.to(".nv-hot-label", { attr: { y: 278 }, duration: 0.08 }, 0.76);
+      tl.to(".nv-hot-frame", { attr: { height: 200, y: 250 }, duration: 0.1 }, 0.72);
+      tl.to(".nv-hot-label", { attr: { y: 278 }, duration: 0.08 }, 0.72);
+      tl.to(".nv-wire", { opacity: 1, duration: 0.08 }, 0.74);
+      // Hold: Pedidos abierto, sin apurarse al producto
+      tl.to(".nv-wire", { opacity: 1, duration: 0.06 }, 0.8);
 
-      /* ——— 0.82–0.90 PRODUCTO ——— */
+      /* ——— 0.82–0.93 PRODUCTO: UI completo con hold ——— */
+      copySwap(tl, ".nv-beat-build", ".nv-beat-product", 0.82);
+
       tl.to(".nv-sys-clientes, .nv-sys-pagos, .nv-sys-operacion, .nv-sys-reportes", {
         opacity: 0,
-        duration: 0.07,
+        duration: 0.06,
       }, 0.82);
       tl.to(".nv-sys-links", { opacity: 0, duration: 0.05 }, 0.82);
-      tl.to(".nv-sys-pedidos", { opacity: 0.22, duration: 0.07 }, 0.82);
+      tl.to(".nv-sys-pedidos", { opacity: 0, duration: 0.07 }, 0.82);
+      tl.to(".nv-camera", { opacity: 0, duration: 0.08 }, 0.82);
 
-      tl.to(
+      tl.fromTo(
         ".nv-product",
+        { autoAlpha: 0, scale: 0.92, y: 24 },
         {
           autoAlpha: 1,
           scale: 1,
           y: 0,
-          duration: 0.09,
-          transformOrigin: "50% 38%",
+          duration: 0.1,
+          transformOrigin: "50% 45%",
         },
         0.84
       );
+      // Hold del producto
+      tl.to(".nv-product", { autoAlpha: 1, duration: 0.06 }, 0.9);
 
-      tl.to(".nv-camera", { opacity: 0.1, duration: 0.07 }, 0.86);
-      tl.to(".nv-sys-pedidos", { opacity: 0, duration: 0.05 }, 0.86);
-      copySwap(tl, ".nv-beat-build", ".nv-beat-product", 0.84);
+      /* ——— 0.92–1.0 LOGO: forge + hold hasta el unpin ——— */
+      tl.to(".nv-product", { autoAlpha: 0, scale: 0.97, y: -12, duration: 0.05 }, 0.92);
+      tl.to(".nv-beat-product", { autoAlpha: 0, duration: 0.05 }, 0.92);
 
-      /* ——— 0.90–1.0 LOGO: se fabrica al centro ——— */
-      tl.to(".nv-product", { autoAlpha: 0, scale: 0.94, y: -16, duration: 0.06 }, 0.9);
-      tl.to(".nv-beat-product", { autoAlpha: 0, duration: 0.05 }, 0.9);
-      tl.to(".nv-camera", { opacity: 0, duration: 0.05 }, 0.9);
-
-      tl.to(".nv-logo-forge", { autoAlpha: 1, duration: 0.04 }, 0.91);
+      tl.to(".nv-logo-forge", { autoAlpha: 1, duration: 0.04 }, 0.93);
       tl.fromTo(
         ".nv-logo-bar-0",
         { autoAlpha: 0, y: 10 },
-        { autoAlpha: 1, y: 0, duration: 0.035 },
-        0.915
+        { autoAlpha: 1, y: 0, duration: 0.03 },
+        0.935
       );
       tl.fromTo(
         ".nv-logo-bar-1",
         { autoAlpha: 0, y: 10 },
-        { autoAlpha: 1, y: 0, duration: 0.035 },
-        0.935
+        { autoAlpha: 1, y: 0, duration: 0.03 },
+        0.95
       );
       tl.fromTo(
         ".nv-logo-bar-2",
         { autoAlpha: 0, y: 10 },
-        { autoAlpha: 1, y: 0, duration: 0.035 },
-        0.955
+        { autoAlpha: 1, y: 0, duration: 0.03 },
+        0.962
       );
       tl.fromTo(
         ".nv-logo-word",
         { autoAlpha: 0, y: 6 },
-        { autoAlpha: 1, y: 0, duration: 0.04 },
-        0.965
+        { autoAlpha: 1, y: 0, duration: 0.035 },
+        0.972
       );
 
-      // Hold breve y salida hacia el resto del site
-      tl.to(".nv-logo-forge", { autoAlpha: 1, duration: 0.015 }, 0.985);
-      tl.to(".nv-logo-forge", { autoAlpha: 0, y: -8, duration: 0.015 }, 0.995);
+      // Se queda hasta el final: al soltar el pin entra Capabilities, sin hueco negro
+      tl.to(".nv-logo-forge", { autoAlpha: 1, y: 0, duration: 0.02 }, 1);
 
       requestAnimationFrame(() => ScrollTrigger.refresh());
     }, stage);
@@ -368,7 +438,7 @@ export function NarrativeExperience() {
         )}
       >
         <div className="flex h-full w-full flex-col lg:flex-row">
-          <div className="relative z-20 flex w-full shrink-0 items-center overflow-hidden px-5 py-14 sm:px-8 lg:w-[46%] lg:px-12 lg:py-0 xl:w-[48%] xl:px-16">
+          <div className="relative z-20 flex w-full shrink-0 items-center overflow-hidden px-5 py-14 sm:px-8 lg:w-[40%] lg:px-10 lg:py-0 xl:w-[42%] xl:px-14">
             <div className="relative w-full max-w-xl">
               {BEATS.map((beat) => (
                 <div

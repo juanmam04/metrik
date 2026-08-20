@@ -2,20 +2,15 @@
 
 /**
  * Consecuencia del módulo PEDIDOS.
- * Escala desde el centro-arriba (donde vive el módulo en la escena).
+ * Payoff de la secuencia: la UI real del sistema.
  */
 export function NarrativeProduct() {
   return (
     <div
-      className="nv-product pointer-events-none absolute inset-0 flex items-center justify-center p-4 lg:p-10"
-      style={{
-        opacity: 0,
-        visibility: "hidden",
-        transform: "scale(0.42) translateY(36px)",
-        transformOrigin: "50% 38%",
-      }}
+      className="nv-product pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-5 sm:p-8 lg:p-6 xl:p-8"
+      style={{ opacity: 0, visibility: "hidden" }}
     >
-      <div className="flex aspect-[16/10] w-full max-w-[860px] overflow-hidden rounded-[10px] border border-white/[0.1] bg-[#0b0b0d] shadow-[0_40px_100px_rgba(0,0,0,0.55)]">
+      <div className="flex aspect-[16/10] w-full max-w-[920px] overflow-hidden rounded-[12px] border border-white/[0.12] bg-[#0b0b0d] shadow-[0_40px_100px_rgba(0,0,0,0.55)]">
         <aside className="hidden w-14 shrink-0 flex-col items-center gap-5 border-r border-white/[0.07] py-5 sm:flex">
           <span className="size-1.5 rounded-full bg-accent" />
           <span className="size-1.5 rounded-full bg-white/20" />
@@ -54,7 +49,10 @@ export function NarrativeProduct() {
                   ["#1839", "Pago"],
                   ["#1831", "Entrega"],
                 ].map(([id, state]) => (
-                  <div key={id} className="flex justify-between border-t border-white/[0.05] pt-2 text-[11px]">
+                  <div
+                    key={id}
+                    className="flex justify-between border-t border-white/[0.05] pt-2 text-[11px]"
+                  >
                     <span className="font-mono text-white/45">{id}</span>
                     <span className="text-white/35">{state}</span>
                   </div>
