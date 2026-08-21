@@ -217,7 +217,7 @@ export function NarrativeExperience() {
       gsap.set(".nv-beat", { autoAlpha: 0 });
       gsap.set(".nv-beat-hero", { autoAlpha: 1 });
       gsap.set(".nv-need", { opacity: 0 });
-      gsap.set(".nv-atmosphere", { opacity: 0.9 });
+      gsap.set(".nv-atmosphere", { opacity: 0.25 });
       gsap.set(".nv-annos", { opacity: 0 });
       gsap.set(".nv-deadends", { opacity: 0 });
       gsap.set(".nv-think", { opacity: 1 });
@@ -279,7 +279,7 @@ export function NarrativeExperience() {
       });
 
       copySwap(tl, ".nv-beat-hero", ".nv-beat-observe", 0.08);
-      tl.to(".nv-atmosphere", { opacity: 1, duration: 0.06 }, 0);
+      tl.to(".nv-atmosphere", { opacity: 0.35, duration: 0.06 }, 0);
       tl.to(pulse, { autoAlpha: 1, duration: 0.04 }, 0.01);
 
       if (line && lineLen > 0) {
@@ -322,7 +322,7 @@ export function NarrativeExperience() {
 
       copySwap(tl, ".nv-beat-observe", ".nv-beat-understand", 0.26);
 
-      tl.to(".nv-atmosphere", { opacity: 0.35, duration: 0.08 }, 0.26);
+      tl.to(".nv-atmosphere", { opacity: 0.2, duration: 0.08 }, 0.26);
       tl.to(".nv-annos", { opacity: 0, duration: 0.06 }, 0.26);
       tl.to(".nv-deadends", { opacity: 0, duration: 0.06 }, 0.26);
       tl.to(".nv-think", { opacity: 0, duration: 0.1 }, 0.28);
@@ -405,7 +405,7 @@ export function NarrativeExperience() {
       <div className="hidden md:block">
         <section
           ref={sectionRef}
-          className="relative bg-[#050505]"
+          className="relative"
           style={{ height: reducedMotion ? "auto" : `${vh * 100}vh` }}
           aria-label="De un problema a un producto"
         >
@@ -417,13 +417,8 @@ export function NarrativeExperience() {
             )}
           >
             <div className="flex h-full w-full flex-row">
-              <div className="relative z-20 flex w-[40%] shrink-0 items-center bg-[#050505] px-10 xl:w-[38%] xl:px-12">
-                {/* Fade suave hacia el mundo — sin que el SVG cruce el texto */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-r from-[#050505] to-transparent"
-                />
-                <div className="relative w-full max-w-lg pr-4">
+              <div className="relative z-20 flex w-[44%] shrink-0 items-center pr-10 xl:w-[42%] xl:pr-12 pl-[max(2rem,calc((100vw-72rem)/2+2rem))]">
+                <div className="relative w-full max-w-md xl:max-w-lg">
                   {BEATS.map((beat) => (
                     <div
                       key={beat.id}
@@ -470,7 +465,7 @@ export function NarrativeExperience() {
                 </div>
               </div>
 
-              <div className="relative z-10 min-h-0 flex-1 overflow-hidden bg-[#050505]">
+              <div className="relative z-10 min-h-0 flex-1 overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
                   <NarrativeWorld />
                   <NarrativeProduct />

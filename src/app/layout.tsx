@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Space_Grotesk } from "next/font/google";
 
+import { SiteAtmosphere } from "@/components/background/site-atmosphere";
 import { ScrollProvider } from "@/components/premium/motion/scroll-provider";
 import { siteConfig } from "@/data/site";
 
@@ -67,6 +68,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} min-h-screen bg-background font-body text-foreground antialiased`}
       >
+        <SiteAtmosphere />
         <ScrollProvider>{children}</ScrollProvider>
       </body>
     </html>

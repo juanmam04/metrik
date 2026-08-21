@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 
 import { PremiumFooter } from "@/components/premium/layout/premium-footer";
 import { PremiumNav } from "@/components/premium/layout/premium-nav";
-import { SiteAtmosphere } from "@/components/background/site-atmosphere";
 import { Container } from "@/components/ui/container";
 import { PrimaryButton } from "@/components/ui/metrik-button";
 import type { Project } from "@/data/projects";
@@ -22,7 +21,6 @@ export function CaseStudyView({ project }: CaseStudyViewProps) {
 
   return (
     <>
-      <SiteAtmosphere />
       <PremiumNav />
       <main className="pt-24">
         <Container className="py-16 md:py-24">

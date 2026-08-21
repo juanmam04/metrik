@@ -10,10 +10,10 @@ export const THINK = [
   { x: 440, y: 590 },
 ] as const;
 
-/** Columnas de criterios — curva que pasa por cada nodo. */
+/** Columnas de criterios — curva; mismo formato de nodo en los tres. */
 export const AXIS_LAYOUT = [
   {
-    x: 210,
+    x: 220,
     y: 460,
     num: "01",
     axis: "CENTRALIZAR",
@@ -22,14 +22,14 @@ export const AXIS_LAYOUT = [
   },
   {
     x: 450,
-    y: 390,
+    y: 360,
     num: "02",
     axis: "AUTOMATIZAR",
     chaos: "Procesos manuales",
     detail: "Flujos que corren solos",
   },
   {
-    x: 690,
+    x: 680,
     y: 470,
     num: "03",
     axis: "ENTENDER",
@@ -131,11 +131,11 @@ const SYS_PORTS = {
   reportesIn: { x: 668, y: 560 },
 } as const;
 const AXIS_SPINE = curveThrough([
-  { x: 110, y: 420 },
+  { x: 130, y: 430 },
   { x: AXIS_LAYOUT[0].x, y: AXIS_LAYOUT[0].y },
   { x: AXIS_LAYOUT[1].x, y: AXIS_LAYOUT[1].y },
   { x: AXIS_LAYOUT[2].x, y: AXIS_LAYOUT[2].y },
-  { x: 790, y: 430 },
+  { x: 780, y: 440 },
 ]);
 
 /**

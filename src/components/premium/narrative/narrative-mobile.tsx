@@ -31,17 +31,8 @@ const STEPS = [
  */
 export function NarrativeMobile() {
   return (
-    <section className="relative bg-[#050505]" aria-label="Metrik">
-      <div className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden px-5 pb-12 pt-28">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 50% at 70% 20%, rgba(81,60,250,0.18), transparent 55%), radial-gradient(ellipse 60% 40% at 20% 80%, rgba(81,60,250,0.08), transparent 50%)",
-          }}
-        />
-
+    <section className="relative" aria-label="Metrik">
+      <div className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden px-6 pb-12 pt-28 sm:px-8">
         <div className="relative z-10">
           <Logo className="mb-10 [&_span]:font-display [&_span]:text-[1.35rem] [&_span]:tracking-[-0.04em]" />
 
@@ -70,7 +61,7 @@ export function NarrativeMobile() {
         </div>
       </div>
 
-      <div className="border-t border-white/[0.06] px-5 py-16">
+      <div className="border-t border-white/[0.06] px-6 py-16 sm:px-8">
         <p className="font-mono text-[11px] tracking-[0.18em] text-accent/75 uppercase">
           Cómo trabajamos
         </p>
@@ -87,7 +78,7 @@ export function NarrativeMobile() {
         </ul>
       </div>
 
-      <div className="border-t border-white/[0.06] px-5 py-16 pb-20">
+      <div className="border-t border-white/[0.06] px-6 py-16 pb-20 sm:px-8">
         <h2 className="font-display text-[1.85rem] leading-[1.08] font-medium tracking-[-0.045em] text-white">
           Una operación.
           <br />
