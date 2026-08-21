@@ -416,8 +416,9 @@ export function NarrativeExperience() {
               reducedMotion ? "min-h-[100svh]" : "h-[100svh]"
             )}
           >
-            <div className="flex h-full w-full flex-row">
-              <div className="relative z-20 flex w-[44%] shrink-0 items-center pr-10 xl:w-[42%] xl:pr-12 pl-[max(2rem,calc((100vw-72rem)/2+2rem))]">
+            {/* Ancho fijo centrado: en ultrawide no se separa texto ↔ mundo */}
+            <div className="mx-auto flex h-full w-full max-w-7xl flex-row px-8 xl:max-w-[1360px] xl:px-10">
+              <div className="relative z-20 flex w-[40%] shrink-0 items-center pr-8 xl:w-[38%] xl:pr-10">
                 <div className="relative w-full max-w-md xl:max-w-lg">
                   {BEATS.map((beat) => (
                     <div
@@ -466,7 +467,7 @@ export function NarrativeExperience() {
               </div>
 
               <div className="relative z-10 min-h-0 flex-1 overflow-hidden">
-                <div className="absolute inset-y-0 left-0 right-8 overflow-hidden xl:right-12">
+                <div className="absolute inset-0 overflow-hidden">
                   <NarrativeWorld />
                   <NarrativeProduct />
                 </div>
