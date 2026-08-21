@@ -466,7 +466,7 @@ export function NarrativeExperience() {
               </div>
 
               <div className="relative z-10 min-h-0 flex-1 overflow-hidden">
-                <div className="absolute inset-y-0 left-0 right-[max(2.5rem,calc((100vw-72rem)/2+2.5rem))] overflow-hidden">
+                <div className="absolute inset-y-0 left-0 right-8 overflow-hidden xl:right-12">
                   <NarrativeWorld />
                   <NarrativeProduct />
                 </div>

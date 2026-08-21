@@ -126,9 +126,9 @@ const SYS_PORTS = {
   pedidosInR: { x: 600, y: 380 },
   pedidosOutBL: { x: 400, y: 490 },
   pedidosOutBR: { x: 540, y: 490 },
-  pagosIn: { x: 680, y: 360 },
+  pagosIn: { x: 650, y: 360 },
   operacionIn: { x: 238, y: 560 },
-  reportesIn: { x: 668, y: 560 },
+  reportesIn: { x: 638, y: 560 },
 } as const;
 const AXIS_SPINE = curveThrough([
   { x: 130, y: 430 },
@@ -751,7 +751,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
 
         <g className="nv-sys nv-sys-pagos" opacity="0">
           <rect
-            x="680"
+            x="650"
             y="300"
             width="160"
             height="120"
@@ -760,24 +760,24 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.16)"
             strokeWidth="0.9"
           />
-          <text x="698" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
+          <text x="668" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
             03
           </text>
-          <text x="698" y="352" fill="rgba(255,255,255,0.9)" fontSize="15" fontFamily={FONT}>
+          <text x="668" y="352" fill="rgba(255,255,255,0.9)" fontSize="15" fontFamily={FONT}>
             Pagos
           </text>
           <line
-            x1="698"
+            x1="668"
             y1="366"
-            x2="820"
+            x2="790"
             y2="366"
             stroke="rgba(255,255,255,0.08)"
             strokeWidth="0.6"
           />
-          <text x="698" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
+          <text x="668" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
             2 pendientes
           </text>
-          <text x="698" y="406" fill="rgba(81,60,250,0.55)" fontSize="11" fontFamily={FONT}>
+          <text x="668" y="406" fill="rgba(81,60,250,0.55)" fontSize="11" fontFamily={FONT}>
             1 cobrado
           </text>
         </g>
@@ -806,7 +806,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
 
         <g className="nv-sys nv-sys-reportes" opacity="0">
           <rect
-            x="580"
+            x="550"
             y="560"
             width="176"
             height="100"
@@ -815,13 +815,13 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.14)"
             strokeWidth="0.9"
           />
-          <text x="598" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
+          <text x="568" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
             05
           </text>
-          <text x="598" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
+          <text x="568" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
             Reportes
           </text>
-          <text x="598" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
+          <text x="568" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
             lectura viva
           </text>
         </g>
