@@ -416,9 +416,9 @@ export function NarrativeExperience() {
               reducedMotion ? "min-h-[100svh]" : "h-[100svh]"
             )}
           >
-            {/* Ancho fijo centrado: en ultrawide no se separa texto ↔ mundo */}
-            <div className="mx-auto flex h-full w-full max-w-7xl flex-row px-8 xl:max-w-[1360px] xl:px-10">
-              <div className="relative z-20 flex w-[40%] shrink-0 items-center pr-8 xl:w-[38%] xl:pr-10">
+            {/* Mac: max-w-6xl (alineado al nav). Ultrawide: un poco más ancho, siempre centrado. */}
+            <div className="mx-auto flex h-full w-full max-w-6xl flex-row px-8 md:px-10 2xl:max-w-[1360px] 2xl:px-12">
+              <div className="relative z-20 flex w-[40%] shrink-0 items-center pr-6 md:pr-8 xl:w-[38%] xl:pr-10">
                 <div className="relative w-full max-w-md xl:max-w-lg">
                   {BEATS.map((beat) => (
                     <div
