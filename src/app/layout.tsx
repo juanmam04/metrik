@@ -32,8 +32,11 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  // Favicon browser/Google: SVG + PNG con transparencia (sin cuadrado negro).
+  // Apple touch: PNG opaco. WhatsApp/OG: solo /og.jpg (JPEG negro).
   icons: {
     icon: [
+      { url: "/brand/favicon.svg", type: "image/svg+xml" },
       { url: "/brand/favicon.png", type: "image/png", sizes: "48x48" },
       { url: "/brand/favicon-32.png", type: "image/png", sizes: "32x32" },
     ],
@@ -46,11 +49,21 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     locale: siteConfig.locale,
     type: "website",
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Metrik",
+        type: "image/jpeg",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} — Software, productos digitales y webs`,
     description: siteConfig.description,
+    images: ["/og.jpg"],
   },
   robots: {
     index: true,

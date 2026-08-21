@@ -1,19 +1,19 @@
 export const team = [
   {
     id: "jm",
-    name: "Juanma Martínez",
+    name: "Juan Manuel Martínez",
     role: "Producto & ingeniería",
-    bio: "Define el problema, la arquitectura y lo que realmente hay que construir.",
+    bio: "Construye el producto: arquitectura, código y lo que realmente hay que hacer existir.",
     link: {
       href: "https://juanmadevv.vercel.app/",
       label: "Ver CV →",
     },
   },
   {
-    id: "studio",
-    name: "Estudio Metrik",
-    role: "Diseño & ejecución",
-    bio: "Interfaz, sistema y desarrollo con el mismo criterio — sin handoffs que rompen el producto.",
+    id: "vm",
+    name: "Victoria Martínez",
+    role: "Operación & crecimiento",
+    bio: "Consigue clientes, arma los planes de acción y lleva la conversación — del primer contacto al proyecto en marcha.",
   },
 ] as const;
 
