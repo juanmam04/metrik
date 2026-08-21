@@ -122,6 +122,13 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               ))}
             </nav>
 
+            <a
+              href="#contacto"
+              onClick={onClose}
+              className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-full bg-foreground text-sm font-medium text-primary-foreground"
+            >
+              Hablemos →
+            </a>
           </motion.div>
         </motion.div>
       ) : null}

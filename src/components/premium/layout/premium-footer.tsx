@@ -2,25 +2,33 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/ui/logo";
+import { TextLink } from "@/components/ui/metrik-button";
 import { navLinks } from "@/data/navigation";
 import { siteConfig } from "@/data/site";
 
 export function PremiumFooter() {
   const year = new Date().getFullYear();
+  const scheduleHref = siteConfig.calendlyUrl || "#contacto";
 
   return (
     <footer className="border-t border-border py-12 md:py-16">
       <Container>
-        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
-          <div>
+        <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-sm">
             <Logo />
-            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              {siteConfig.tagline}
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              {siteConfig.description}
             </p>
+            <TextLink href={scheduleHref} className="mt-6 text-[14px]">
+              {siteConfig.calendlyUrl ? "Agendar una llamada" : "Escribinos"}
+            </TextLink>
           </div>
 
           <nav aria-label="Footer">
-            <ul className="flex flex-col gap-3 sm:flex-row sm:gap-8">
+            <p className="font-mono text-[10px] tracking-[0.16em] text-white/30 uppercase">
+              Navegación
+            </p>
+            <ul className="mt-4 flex flex-col gap-3">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link

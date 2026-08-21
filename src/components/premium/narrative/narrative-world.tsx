@@ -121,14 +121,14 @@ function linkCurve(
 
 /** Puertos de las cards del sistema — mismos bordes que los rects. */
 const SYS_PORTS = {
-  clientesOut: { x: 268, y: 360 },
-  pedidosInL: { x: 340, y: 380 },
-  pedidosInR: { x: 600, y: 380 },
-  pedidosOutBL: { x: 400, y: 490 },
-  pedidosOutBR: { x: 540, y: 490 },
-  pagosIn: { x: 650, y: 360 },
-  operacionIn: { x: 238, y: 560 },
-  reportesIn: { x: 638, y: 560 },
+  clientesOut: { x: 308, y: 360 },
+  pedidosInL: { x: 380, y: 380 },
+  pedidosInR: { x: 620, y: 380 },
+  pedidosOutBL: { x: 430, y: 490 },
+  pedidosOutBR: { x: 560, y: 490 },
+  pagosIn: { x: 670, y: 360 },
+  operacionIn: { x: 278, y: 560 },
+  reportesIn: { x: 658, y: 560 },
 } as const;
 const AXIS_SPINE = curveThrough([
   { x: 130, y: 430 },
@@ -146,7 +146,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
   return (
     <svg
       className="nv-world pointer-events-none h-full w-full"
-      viewBox={compact ? "60 60 780 720" : "100 70 740 640"}
+      viewBox={compact ? "60 60 780 720" : "40 60 800 660"}
       fill="none"
       aria-hidden
       preserveAspectRatio="xMidYMid meet"
@@ -475,18 +475,39 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.28)"
             strokeWidth="0.85"
           />
+          {/* Mismo lenguaje visual que el trazo de pensamiento: glow + núcleo en gradiente */}
+          <path
+            className="nv-draw nv-axis-glow"
+            d={AXIS_SPINE}
+            stroke="rgba(81,60,250,0.55)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            filter="url(#nv-glow)"
+            opacity="0.55"
+          />
           <path
             className="nv-draw nv-axis-spine"
             d={AXIS_SPINE}
-            stroke="#513CFA"
-            strokeWidth="1.55"
+            stroke="url(#nv-think-grad)"
+            strokeWidth="2.15"
             strokeLinecap="round"
+            strokeLinejoin="round"
             fill="none"
           />
           {AXIS_LAYOUT.map((a) => (
             <g key={a.num} className="nv-axis-node">
-              <circle cx={a.x} cy={a.y} r="5" fill="#513CFA" />
-              <circle cx={a.x} cy={a.y} r="1.8" fill="#fff" fillOpacity="0.7" />
+              <circle
+                cx={a.x}
+                cy={a.y}
+                r="15"
+                stroke="rgba(81,60,250,0.35)"
+                strokeWidth="0.85"
+                fill="rgba(81,60,250,0.08)"
+              />
+              <circle cx={a.x} cy={a.y} r="5.2" fill="#513CFA" />
+              <circle cx={a.x} cy={a.y} r="1.8" fill="#fff" fillOpacity="0.75" />
               <text
                 x={a.x}
                 y={a.y - 56}
@@ -514,8 +535,8 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
                 y1={a.y - 8}
                 x2={a.x + 52}
                 y2={a.y - 8}
-                stroke="rgba(81,60,250,0.5)"
-                strokeWidth="0.9"
+                stroke="rgba(81,60,250,0.55)"
+                strokeWidth="1"
               />
               <text
                 x={a.x}
@@ -544,7 +565,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
         {/* Arquitectura abierta: tipografía libre + hub + satélites */}
         <g className="nv-sys-head" opacity="0">
           <text
-            x="120"
+            x="160"
             y="178"
             fill="rgba(81,60,250,0.95)"
             fontSize="11"
@@ -553,10 +574,10 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
           >
             SISTEMA / 03
           </text>
-          <text x="120" y="214" fill="rgba(255,255,255,0.9)" fontSize="22" fontFamily={FONT}>
+          <text x="160" y="214" fill="rgba(255,255,255,0.9)" fontSize="22" fontFamily={FONT}>
             La operación, armada.
           </text>
-          <text x="120" y="240" fill="rgba(255,255,255,0.55)" fontSize="14" fontFamily={FONT}>
+          <text x="160" y="240" fill="rgba(255,255,255,0.55)" fontSize="14" fontFamily={FONT}>
             Piezas que se hablan. Un solo criterio.
           </text>
         </g>
@@ -604,7 +625,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
 
         <g className="nv-sys nv-sys-clientes" opacity="0">
           <rect
-            x="100"
+            x="140"
             y="300"
             width="168"
             height="120"
@@ -613,24 +634,24 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.16)"
             strokeWidth="0.9"
           />
-          <text x="118" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
+          <text x="158" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
             01
           </text>
-          <text x="118" y="352" fill="rgba(255,255,255,0.92)" fontSize="15" fontFamily={FONT}>
+          <text x="158" y="352" fill="rgba(255,255,255,0.92)" fontSize="15" fontFamily={FONT}>
             Clientes
           </text>
           <line
-            x1="118"
+            x1="158"
             y1="366"
-            x2="248"
+            x2="288"
             y2="366"
             stroke="rgba(255,255,255,0.08)"
             strokeWidth="0.6"
           />
-          <text x="118" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
+          <text x="158" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
             Norte · SA
           </text>
-          <text x="118" y="406" fill="rgba(255,255,255,0.28)" fontSize="11" fontFamily={FONT}>
+          <text x="158" y="406" fill="rgba(255,255,255,0.28)" fontSize="11" fontFamily={FONT}>
             Rivadavia
           </text>
         </g>
@@ -639,7 +660,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
         <g className="nv-sys nv-sys-pedidos" opacity="0">
           <rect
             className="nv-hot-frame"
-            x="340"
+            x="380"
             y="270"
             width="260"
             height="220"
@@ -650,21 +671,21 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
           />
           <rect
             className="nv-hot-chrome"
-            x="340"
+            x="380"
             y="270"
             width="260"
             height="44"
             rx="12"
             fill="rgba(81,60,250,0.14)"
           />
-          <rect x="340" y="302" width="260" height="12" fill="rgba(81,60,250,0.14)" />
-          <circle cx="358" cy="292" r="3.2" fill="#513CFA" />
-          <text className="nv-hot-label" x="372" y="297" fill="#fff" fontSize="14" fontFamily={FONT}>
+          <rect x="380" y="302" width="260" height="12" fill="rgba(81,60,250,0.14)" />
+          <circle cx="398" cy="292" r="3.2" fill="#513CFA" />
+          <text className="nv-hot-label" x="412" y="297" fill="#fff" fontSize="14" fontFamily={FONT}>
             Pedidos
           </text>
           <text
             className="nv-hot-meta"
-            x="580"
+            x="620"
             y="297"
             textAnchor="end"
             fill="rgba(81,60,250,0.8)"
@@ -675,11 +696,11 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
           </text>
 
           <g className="nv-hot-preview">
-            <text x="356" y="342" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily={MONO}>
+            <text x="396" y="342" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily={MONO}>
               HOY
             </text>
             <rect
-              x="356"
+              x="396"
               y="354"
               width="228"
               height="44"
@@ -688,14 +709,14 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
               stroke="rgba(81,60,250,0.4)"
               strokeWidth="0.75"
             />
-            <text x="368" y="374" fill="rgba(81,60,250,0.95)" fontSize="11" fontFamily={MONO}>
+            <text x="408" y="374" fill="rgba(81,60,250,0.95)" fontSize="11" fontFamily={MONO}>
               #1842
             </text>
-            <text x="368" y="390" fill="rgba(255,255,255,0.68)" fontSize="12" fontFamily={FONT}>
+            <text x="408" y="390" fill="rgba(255,255,255,0.68)" fontSize="12" fontFamily={FONT}>
               En curso
             </text>
             <text
-              x="568"
+              x="608"
               y="382"
               textAnchor="end"
               fill="rgba(255,255,255,0.32)"
@@ -706,7 +727,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             </text>
 
             <rect
-              x="356"
+              x="396"
               y="408"
               width="228"
               height="36"
@@ -715,14 +736,14 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
               stroke="rgba(255,255,255,0.09)"
               strokeWidth="0.65"
             />
-            <text x="368" y="430" fill="rgba(255,255,255,0.42)" fontSize="11" fontFamily={MONO}>
+            <text x="408" y="430" fill="rgba(255,255,255,0.42)" fontSize="11" fontFamily={MONO}>
               #1839 · esperando pago
             </text>
           </g>
 
           <g className="nv-wire" opacity="0">
             <rect
-              x="356"
+              x="396"
               y="454"
               width="228"
               height="36"
@@ -731,16 +752,16 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
               stroke="rgba(255,255,255,0.08)"
               strokeWidth="0.65"
             />
-            <text x="368" y="476" fill="rgba(255,255,255,0.36)" fontSize="11" fontFamily={MONO}>
+            <text x="408" y="476" fill="rgba(255,255,255,0.36)" fontSize="11" fontFamily={MONO}>
               #1831 · en entrega
             </text>
-            <text x="356" y="514" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily={MONO}>
+            <text x="396" y="514" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily={MONO}>
               cliente → pedido → pago → entrega
             </text>
             <line
               x1="356"
               y1="526"
-              x2="540"
+              x2="580"
               y2="526"
               stroke="rgba(81,60,250,0.4)"
               strokeWidth="1.1"
@@ -751,7 +772,7 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
 
         <g className="nv-sys nv-sys-pagos" opacity="0">
           <rect
-            x="650"
+            x="670"
             y="300"
             width="160"
             height="120"
@@ -760,31 +781,31 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.16)"
             strokeWidth="0.9"
           />
-          <text x="668" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
+          <text x="688" y="328" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily={MONO}>
             03
           </text>
-          <text x="668" y="352" fill="rgba(255,255,255,0.9)" fontSize="15" fontFamily={FONT}>
+          <text x="688" y="352" fill="rgba(255,255,255,0.9)" fontSize="15" fontFamily={FONT}>
             Pagos
           </text>
           <line
-            x1="668"
+            x1="688"
             y1="366"
-            x2="790"
+            x2="810"
             y2="366"
             stroke="rgba(255,255,255,0.08)"
             strokeWidth="0.6"
           />
-          <text x="668" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
+          <text x="688" y="388" fill="rgba(255,255,255,0.4)" fontSize="11" fontFamily={FONT}>
             2 pendientes
           </text>
-          <text x="668" y="406" fill="rgba(81,60,250,0.55)" fontSize="11" fontFamily={FONT}>
+          <text x="688" y="406" fill="rgba(81,60,250,0.55)" fontSize="11" fontFamily={FONT}>
             1 cobrado
           </text>
         </g>
 
         <g className="nv-sys nv-sys-operacion" opacity="0">
           <rect
-            x="150"
+            x="190"
             y="560"
             width="176"
             height="100"
@@ -793,20 +814,20 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.14)"
             strokeWidth="0.9"
           />
-          <text x="168" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
+          <text x="208" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
             04
           </text>
-          <text x="168" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
+          <text x="208" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
             Operación
           </text>
-          <text x="168" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
+          <text x="208" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
             3 en piso
           </text>
         </g>
 
         <g className="nv-sys nv-sys-reportes" opacity="0">
           <rect
-            x="550"
+            x="570"
             y="560"
             width="176"
             height="100"
@@ -815,13 +836,13 @@ export function NarrativeWorld({ compact = false }: { compact?: boolean }) {
             stroke="rgba(255,255,255,0.14)"
             strokeWidth="0.9"
           />
-          <text x="568" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
+          <text x="588" y="588" fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily={MONO}>
             05
           </text>
-          <text x="568" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
+          <text x="588" y="612" fill="rgba(255,255,255,0.88)" fontSize="15" fontFamily={FONT}>
             Reportes
           </text>
-          <text x="568" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
+          <text x="588" y="636" fill="rgba(255,255,255,0.34)" fontSize="11" fontFamily={FONT}>
             lectura viva
           </text>
         </g>

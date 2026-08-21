@@ -332,6 +332,7 @@ export function NarrativeExperience() {
 
       tl.to(".nv-frag", { opacity: 0, duration: 0.1 }, 0.28);
       tl.to(".nv-axis-stage", { opacity: 1, duration: 0.1 }, 0.32);
+      tl.to(".nv-axis-glow", { attr: { "stroke-dashoffset": 0 }, opacity: 0.55, duration: 0.14 }, 0.34);
       tl.to(".nv-axis-spine", { attr: { "stroke-dashoffset": 0 }, duration: 0.14 }, 0.34);
 
       copySwap(tl, ".nv-beat-understand", ".nv-beat-structure", 0.46);
@@ -356,10 +357,10 @@ export function NarrativeExperience() {
 
       tl.to(
         ".nv-hot-frame",
-        { attr: { height: 290, width: 300, x: 320 }, duration: 0.12 },
+        { attr: { height: 290, width: 300, x: 360 }, duration: 0.12 },
         0.7
       );
-      tl.to(".nv-hot-chrome", { attr: { width: 300, x: 320 }, duration: 0.12 }, 0.7);
+      tl.to(".nv-hot-chrome", { attr: { width: 300, x: 360 }, duration: 0.12 }, 0.7);
       tl.to(".nv-wire", { opacity: 1, duration: 0.1 }, 0.74);
       tl.to(".nv-sys-pedidos", { x: 20, y: -24, duration: 0.12 }, 0.7);
       tl.to(".nv-wire", { opacity: 1, duration: 0.06 }, 0.8);

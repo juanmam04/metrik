@@ -40,8 +40,15 @@ export function PrimaryButton({
   );
 
   if (href) {
+    const external = href.startsWith("http");
     return (
-      <a href={href} className={classes} onClick={onClick} aria-label={ariaLabel}>
+      <a
+        href={href}
+        className={classes}
+        onClick={onClick}
+        aria-label={ariaLabel}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {children}
       </a>
     );
@@ -89,8 +96,15 @@ export function SecondaryButton({
   );
 
   if (href) {
+    const external = href.startsWith("http");
     return (
-      <a href={href} className={classes} onClick={onClick} aria-label={ariaLabel}>
+      <a
+        href={href}
+        className={classes}
+        onClick={onClick}
+        aria-label={ariaLabel}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {content}
       </a>
     );

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { PrimaryButton } from "@/components/ui/metrik-button";
 import { easeOutExpo } from "@/lib/easing";
+import { siteConfig } from "@/data/site";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -81,9 +82,29 @@ export function ContactSection() {
               Contanos qué estás tratando de resolver.
             </h2>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-white/45">
-              No hace falta que tengas definido el producto.
+              No hace falta que tengas definido el producto. Con una conversación alcanza para
+              saber si podemos ayudar.
             </p>
-            <p className="mt-8 text-[13px] text-white/30">Respondemos personalmente.</p>
+            <ul className="mt-8 space-y-3 text-[14px] text-white/40">
+              <li>· Respondemos personalmente, no con un bot.</li>
+              <li>· Si no es un buen fit, te lo decimos.</li>
+              <li>· Software, web o producto: el proceso es el mismo.</li>
+            </ul>
+            {siteConfig.calendlyUrl ? (
+              <PrimaryButton href={siteConfig.calendlyUrl} className="mt-10">
+                Agendar 20 min →
+              </PrimaryButton>
+            ) : (
+              <p className="mt-8 text-[13px] text-white/30">
+                O escribinos directo a{" "}
+                <a
+                  href={`mailto:${siteConfig.email}`}
+                  className="text-white/55 underline-offset-4 hover:text-white hover:underline"
+                >
+                  {siteConfig.email}
+                </a>
+              </p>
+            )}
           </div>
 
           <motion.form
