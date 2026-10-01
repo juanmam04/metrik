@@ -10,7 +10,7 @@ import { siteConfig } from "@/data/site";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
-const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+const ACCESS_KEY = siteConfig.web3formsAccessKey;
 
 export function ContactSection() {
   const [status, setStatus] = useState<Status>("idle");

@@ -8,4 +8,11 @@ export const siteConfig = {
   /** Pegá tu link de Calendly en .env.local como NEXT_PUBLIC_CALENDLY_URL */
   calendlyUrl: process.env.NEXT_PUBLIC_CALENDLY_URL ?? "",
   email: "hola@metrik.dev",
+  /**
+   * Web3Forms access key (pública por diseño: se usa en el browser).
+   * Override con NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY en Vercel si la rotás.
+   */
+  web3formsAccessKey:
+    process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ??
+    "e3d858bc-aad5-4075-aed7-26c3246eb028",
 } as const;
