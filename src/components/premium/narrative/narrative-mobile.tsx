@@ -1,6 +1,5 @@
 "use client";
 
-import { Logo } from "@/components/ui/logo";
 import { NarrativeProduct } from "@/components/premium/narrative/narrative-product";
 
 const STEPS = [
@@ -32,10 +31,8 @@ const STEPS = [
 export function NarrativeMobile() {
   return (
     <section className="relative" aria-label="Metrik">
-      <div className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden px-5 pb-16 pt-24 sm:px-8 sm:pb-12 sm:pt-28">
-        <div className="relative z-10">
-          <Logo className="mb-8 sm:mb-10 [&_span]:font-display [&_span]:text-[1.25rem] sm:[&_span]:text-[1.35rem] [&_span]:tracking-[-0.04em]" />
-
+      <div className="relative min-h-[100svh] overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-36 sm:pb-20">
+        <div className="relative z-10 max-w-lg">
           <h1 className="font-display text-[2rem] leading-[1.1] sm:text-[2.35rem] sm:leading-[1.05] font-medium tracking-[-0.045em] text-white">
             Software que empieza
             <br />
